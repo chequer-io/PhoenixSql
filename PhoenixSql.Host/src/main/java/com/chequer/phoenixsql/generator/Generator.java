@@ -6,8 +6,12 @@ import org.apache.phoenix.parse.*;
 
 import java.io.File;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
 public class Generator {
@@ -51,7 +55,11 @@ public class Generator {
     }
 
     private static void generateNode(Class<?> clazz) {
-        System.out.println(clazz);
+        if (Modifier.isAbstract(clazz.getModifiers())) {
+            System.out.printf("%s (abstract)%n", clazz.getSimpleName());
+        } else {
+            System.out.println(clazz.getSimpleName());
+        }
 
         for (final var field : clazz.getDeclaredFields()) {
             if (Modifier.isStatic(field.getModifiers())) {
@@ -76,6 +84,23 @@ public class Generator {
 
         var buffer = new Class<?>[queue.size()];
         queue.toArray(buffer);
+
+        return buffer;
+    }
+
+    private static Field[] getLocalFields(Class<?> clazz) {
+        var list = new ArrayList<Field>();
+
+        for (final var field : clazz.getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+
+            list.add(field);
+        }
+
+        var buffer = new Field[list.size()];
+        list.toArray(buffer);
 
         return buffer;
     }

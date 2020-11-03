@@ -1,13 +1,13 @@
 package com.chequer.phoenixsql.generator.proto;
 
 public abstract class ProtoMember {
-    private String comment;
+    private ProtoComment comment;
 
-    public String getComment() {
+    public ProtoComment getComment() {
         return comment;
     }
 
-    public void setComment(String comment) {
+    public void setComment(ProtoComment comment) {
         this.comment = comment;
     }
 }

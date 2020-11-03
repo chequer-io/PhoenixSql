@@ -57,8 +57,8 @@ public class ProtoWriter {
 
     public void write(ProtoMember member) {
         if (member.getComment() != null) {
-            appendIndent();
-            appendLine("// " + member.getComment());
+            write(member.getComment());
+            appendLine();
         }
 
         if (member instanceof ProtoFile) {
@@ -69,7 +69,33 @@ public class ProtoWriter {
             writeField((ProtoField) member);
         } else if (member instanceof ProtoEnum) {
             writeEnum((ProtoEnum) member);
+        } else if (member instanceof ProtoSingLineComment) {
+            writeSingLineComment((ProtoSingLineComment) member);
+        } else if (member instanceof ProtoMultiLineComment) {
+            writeMultiLineComment((ProtoMultiLineComment) member);
         }
+    }
+
+    private void writeMultiLineComment(ProtoMultiLineComment comment) {
+        appendIndent();
+        appendLine("/*");
+
+        depth++;
+
+        for (var line : comment.getContent().split("\n")) {
+            appendIndent();
+            appendLine(line);
+        }
+
+        depth--;
+
+        appendIndent();
+        append("*/");
+    }
+
+    private void writeSingLineComment(ProtoSingLineComment comment) {
+        appendIndent();
+        append(String.format("// %s", comment.getContent()));
     }
 
     private void writeFile(ProtoFile file) {
