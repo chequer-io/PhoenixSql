@@ -1,0 +1,986 @@
+syntax = "proto3";
+
+package proto;
+
+option csharp_namespace = "PhoenixSql.Proto";
+option java_package = "com.chequer.phoenixsql.proto";
+
+import "common.proto";
+import "google/protobuf/any.proto";
+
+message ParseNode {
+    oneof inherit {
+        SubqueryParseNode subquery = 1;
+        LiteralParseNode literal = 2;
+        SequenceValueParseNode sequenceValue = 3;
+        WildcardParseNode wildcard = 4;
+        ColumnParseNode column = 5;
+        BindParseNode bind = 6;
+        FamilyWildcardParseNode familyWildcard = 7;
+        TableWildcardParseNode tableWildcard = 8;
+        RowValueConstructorParseNode rowValueConstructor = 9;
+        AndParseNode and = 10;
+        ArithmeticParseNode arithmetic = 11;
+        BetweenParseNode between = 12;
+        InParseNode in = 13;
+        ComparisonParseNode comparison = 14;
+        LikeParseNode like = 15;
+        CaseParseNode case = 16;
+        AggregateFunctionParseNode aggregateFunction = 17;
+        AvgAggregateParseNode avgAggregate = 18;
+        AggregateFunctionWithinGroupParseNode aggregateFunctionWithinGroup = 19;
+        DistinctCountHyperLogLogAggregateParseNode distinctCountHyperLogLogAggregate = 20;
+        DistinctCountParseNode distinctCount = 21;
+        FirstValueAggregateParseNode firstValueAggregate = 22;
+        FirstValuesAggregateParseNode firstValuesAggregate = 23;
+        LastValueAggregateParseNode lastValueAggregate = 24;
+        LastValuesAggregateParseNode lastValuesAggregate = 25;
+        MaxAggregateParseNode maxAggregate = 26;
+        MinAggregateParseNode minAggregate = 27;
+        NthValueAggregateParseNode nthValueAggregate = 28;
+        SumAggregateParseNode sumAggregate = 29;
+        ArrayModifierParseNode arrayModifier = 30;
+        CeilParseNode ceil = 31;
+        CurrentDateParseNode currentDate = 32;
+        CurrentTimeParseNode currentTime = 33;
+        FloorParseNode floor = 34;
+        PhoenixRowTimestampParseNode phoenixRowTimestamp = 35;
+        RegexpReplaceParseNode regexpReplace = 36;
+        RegexpSplitParseNode regexpSplit = 37;
+        RegexpSubstrParseNode regexpSubstr = 38;
+        RoundParseNode round = 39;
+        ToCharParseNode toChar = 40;
+        ToDateParseNode toDate = 41;
+        ToNumberParseNode toNumber = 42;
+        ToTimeParseNode toTime = 43;
+        ToTimestampParseNode toTimestamp = 44;
+        UDFParseNode udf = 45;
+        InListParseNode inList = 46;
+        OrParseNode or = 47;
+        StringConcatParseNode stringConcat = 48;
+        NotParseNode not = 49;
+        CastParseNode cast = 50;
+        ExistsParseNode exists = 51;
+        IsNullParseNode isNull = 52;
+    }
+}
+
+message AliasedNode {
+    string alias = 1;
+    ParseNode node = 2;
+    bool isCaseSensitve = 3;
+}
+
+message HintNode {
+    message HintEntry {
+        Hint key = 1;
+        string value = 2;
+    }
+
+    repeated HintEntry hints = 1;
+}
+
+message LimitNode {
+    BindParseNode bindNode = 1;
+    LiteralParseNode LimitNode = 2;
+}
+
+message NamedNode {
+    string name = 1;
+    bool isCaseSensitive = 2;
+}
+
+message OffsetNode {
+    ParseNode node = 1;
+}
+
+message OrderByNode {
+    ParseNode child = 1;
+    bool nullsLast = 2;
+    bool orderAscending = 3;
+}
+
+message SubqueryParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // TerminalParseNode
+
+    // SubqueryParseNode
+    SelectStatement select = 3;
+    bool expectSingleRow = 4;
+}
+
+message LiteralParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // TerminalParseNode
+
+    // LiteralParseNode
+    google.protobuf.Any value = 3;
+    PDataType type = 4;
+}
+
+message SequenceValueParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // TerminalParseNode
+
+    // SequenceValueParseNode
+    TableName tableName = 3;
+    Op op = 4;
+    ParseNode numToAllocate = 5;
+
+    enum Op {
+        Next = 0;
+        Current = 1;
+    }
+}
+
+message WildcardParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // TerminalParseNode
+    bool isRewrite = 3;
+}
+
+message ColumnParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // TerminalParseNode
+
+    // NamedParseNode
+    NamedNode namedNode = 3;
+
+    // ColumnParseNode
+    TableName tableName = 4;
+    string fullName = 5;
+    string alias = 6;
+}
+
+message BindParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // TerminalParseNode
+
+    // NamedParseNode
+    NamedNode namedNode = 3;
+
+    // BindParseNode
+    int32 index = 4;
+}
+
+message FamilyWildcardParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // TerminalParseNode
+
+    // NamedParseNode
+    NamedNode namedNode = 3;
+
+    // FamilyWildcardParseNode
+    bool isRewrite = 4;
+}
+
+message TableWildcardParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // TerminalParseNode
+
+    // NamedParseNode
+    NamedNode namedNode = 3;
+
+    // TableWildcardParseNode
+    TableName tableName = 4;
+    bool isRewrite = 5;
+}
+
+message RowValueConstructorParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // RowValueConstructorParseNode
+}
+
+message AndParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // AndParseNode
+}
+
+message ArithmeticParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // ArithmeticParseNode
+    Operator operator = 3;
+}
+
+message ArrayComparisonNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // ArrayComparisonNode
+    ArrayComparisonType type = 3;
+}
+
+message ArrayConstructorNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // ArrayConstructorNode
+}
+
+message ArrayElemRefNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // ArrayElemRefNode
+}
+
+message BetweenParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // BetweenParseNode
+    bool negate = 3;
+}
+
+message InParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // BinaryParseNode
+
+    // InParseNode
+    bool negate = 3;
+    bool isSubqueryDistinct = 4;
+}
+
+message ComparisonParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // BinaryParseNode
+
+    // ComparisonParseNode
+    ComparisonType type = 3;
+}
+
+message LikeParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // BinaryParseNode
+
+    // LikeParseNode
+    bool negate = 3;
+    LikeType likeType = 4;
+}
+
+message CaseParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // CaseParseNode
+}
+
+message AggregateFunctionParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+}
+
+message AvgAggregateParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+
+    // AvgAggregateParseNode
+}
+
+message AggregateFunctionWithinGroupParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+
+    // AggregateFunctionWithinGroupParseNode
+}
+
+
+message DistinctCountHyperLogLogAggregateParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+
+    // DelegateConstantToCountParseNode
+
+    // DistinctCountHyperLogLogAggregateParseNode
+}
+
+message DistinctCountParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+
+    // DelegateConstantToCountParseNode
+
+    // DistinctCountParseNode
+}
+
+message FirstValueAggregateParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+
+    // DelegateConstantToCountParseNode
+
+    // FirstValueAggregateParseNode
+}
+
+message FirstValuesAggregateParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+
+    // DelegateConstantToCountParseNode
+
+    // FirstValuesAggregateParseNode
+}
+
+message LastValueAggregateParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+
+    // DelegateConstantToCountParseNode
+
+    // LastValueAggregateParseNode
+}
+
+message LastValuesAggregateParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+
+    // DelegateConstantToCountParseNode
+
+    // LastValuesAggregateParseNode
+}
+
+message MaxAggregateParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+
+    // DelegateConstantToCountParseNode
+
+    // MaxAggregateParseNode
+}
+
+message MinAggregateParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+
+    // DelegateConstantToCountParseNode
+
+    // MinAggregateParseNode
+}
+
+message NthValueAggregateParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+
+    // DelegateConstantToCountParseNode
+
+    // NthValueAggregateParseNode
+}
+
+message SumAggregateParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // AggregateFunctionParseNode
+
+    // DelegateConstantToCountParseNode
+
+    // SumAggregateParseNode
+}
+
+message ArrayModifierParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // ArrayModifierParseNode
+}
+
+message CeilParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // CeilParseNode
+}
+
+message CurrentDateParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // CurrentDateFunctionPars
+}
+
+message CurrentTimeParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // CurrentTimeFunctionPars
+}
+
+message FloorParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // FloorParseNode
+}
+
+message PhoenixRowTimestampParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // PhoenixRowTimestampFunc
+}
+
+message RegexpReplaceParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // RegexpReplaceFunctionPa
+}
+
+message RegexpSplitParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // RegexpSplitFunctionPars
+}
+
+message RegexpSubstrParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // RegexpSubstrFunctionPar
+}
+
+message RoundParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // RoundParseNode
+}
+
+message ToCharParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // ToCharParseNode
+}
+
+message ToDateParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // ToDateParseNode
+}
+
+message ToNumberParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // ToNumberFunctionParseNo
+}
+
+message ToTimeParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // ToTimeParseNode
+}
+
+message ToTimestampParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // ToTimestampFunctionPars
+}
+
+message UDFParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // FunctionParseNode
+    string name = 3;
+    BuiltInFunctionInfo info = 4;
+
+    // UDFParseNode
+}
+
+message InListParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // InListParseNode
+    bool negate = 3;
+}
+
+message OrParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // OrParseNode
+}
+
+message StringConcatParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // StringConcatParseNode
+}
+
+message NotParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // UnaryParseNode
+
+    // NotParseNode
+}
+
+message CastParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // UnaryParseNode
+
+    // CastParseNode
+    PDataType dt = 3;
+    int32 maxLength = 4;
+    int32 scale = 5;
+}
+
+message ExistsParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // UnaryParseNode
+
+    // ExistsParseNode
+    bool negate = 3;
+}
+
+message IsNullParseNode {
+    // ParseNode
+    repeated ParseNode children = 1;
+    bool isStateless = 2;
+
+    // CompoundParseNode
+
+    // UnaryParseNode
+
+    // IsNullParseNode
+    bool negate = 3;
+}
+
+message SelectStatement {
+    // BindableStatement
+    int32 bindCount = 1;
+    StatementOperation operation = 2;
+
+    // FilterableStatement
+    HintNode hint = 3;
+    ParseNode where = 4;
+    bool isDistinct = 5;
+    bool isAggregate = 6;
+    repeated OrderByNode orderBy = 7;
+    double tableSamplingRate = 8;
+    LimitNode limit = 9;
+    OffsetNode offset = 10;
+
+    // SelectStatement
+    repeated AliasedNode select = 11;
+    TableNode fromTable = 12;
+    repeated ParseNode groupBy = 13;
+    ParseNode having = 14;
+    bool hasSequence = 15;
+    bool hasWildcard = 16;
+    repeated SelectStatement selects = 17;
+    repeated UDFParseNodeEntry udfParseNodes = 18;
+
+    message UDFParseNodeEntry {
+        string key = 1;
+        UDFParseNode value = 2;
+    }
+}
+
+message TableName {
+    string tableName = 1;
+    string schemaName = 2;
+    bool isTableNameCaseSensitive = 3;
+    bool isSchemaNameCaseSensitive = 4;
+}
+
+message TableNode {
+    oneof inherit {
+        JoinTableNode join = 1;
+        NamedTableNode named = 2;
+        BindTableNode bind = 3;
+        DerivedTableNode derived = 4;
+    }
+}
+
+message JoinTableNode {
+    // TableNode
+    string alias = 1;
+
+    // JoinTableNode
+    JoinType type = 2;
+    TableNode lhs = 3;
+    TableNode rhs = 4;
+    ParseNode onNode = 5;
+    bool singleValueOnly = 6;
+}
+
+message NamedTableNode {
+    // TableNode
+    string alias = 1;
+
+    // ConcreteTableNode
+    TableName name = 2;
+    double tableSamplingRate = 3;
+
+    // NamedTableNode
+    repeated ColumnDef dynColumns = 4;
+}
+
+message BindTableNode {
+    // TableNode
+    string alias = 1;
+
+    // ConcreteTableNode
+    TableName name = 2;
+    double tableSamplingRate = 3;
+
+    // BindTableNode
+}
+
+message DerivedTableNode {
+    // TableNode
+    string alias = 1;
+
+    // DerivedTableNode
+    SelectStatement select = 2;
+}
+
+message ColumnDef {
+    ColumnName columnDefName = 1;
+    PDataType dataType = 2;
+    bool isNull = 3;
+    int32 maxLength = 4;
+    int32 scale = 5;
+    bool isPk = 6;
+    SortOrder sortOrder = 7;
+    bool isArray = 8;
+    int32 arrSize = 9;
+    string expressionStr = 10;
+    bool isRowTimestamp = 11;
+}
+
+message ColumnName {
+    NamedNode familyNode = 1;
+    NamedNode columnNode = 2;
+}
+
+message BuiltInFunctionInfo {
+    string name = 1;
+    FunctionClassType classType = 2;
+    bool isAggregate = 3;
+    int32 requiredArgCount = 4;
+}

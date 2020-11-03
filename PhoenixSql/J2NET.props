@@ -1,0 +1,22 @@
+﻿<Project>
+
+    <PropertyGroup>
+        <J2NETVersion>1.1.0</J2NETVersion>
+        <OSPlatform Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">OSX</OSPlatform>
+        <OSPlatform Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">Linux</OSPlatform>
+        <OSPlatform Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">Windows</OSPlatform>
+        <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="J2NET" Version="$(J2NETVersion)"/>
+    </ItemGroup>
+
+    <ItemGroup Label="Development" Condition=" '$(RID)' == '' And '$(Packaging)' == '' ">
+        <PackageReference Condition=" '$(OSPlatform)' == 'OSX' And '$(OSArchitecture)' == 'X64' " Include="J2NET.Runtime.Mac" Version="$(J2NETVersion)"/>
+        <PackageReference Condition=" '$(OSPlatform)' == 'Linux' And '$(OSArchitecture)' == 'X64' " Include="J2NET.Runtime.Linux" Version="$(J2NETVersion)"/>
+        <PackageReference Condition=" '$(OSPlatform)' == 'Windows' And '$(OSArchitecture)' == 'X64' " Include="J2NET.Runtime.Win64" Version="$(J2NETVersion)"/>
+        <PackageReference Condition=" '$(OSPlatform)' == 'Windows' And '$(OSArchitecture)' == 'X86' " Include="J2NET.Runtime.Win32" Version="$(J2NETVersion)"/>
+    </ItemGroup>
+
+</Project>
