@@ -52,6 +52,12 @@
             <artifactId>phoenix-core</artifactId>
             <version>5.0.0-HBase-2.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.12</version>
+        </dependency>
     </dependencies>
 
     <build>
