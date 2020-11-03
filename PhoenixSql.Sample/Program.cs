@@ -6,7 +6,7 @@ namespace PhoenixSql.Sample
     {
         private static void Main(string[] args)
         {
-            
+            PhoenixSqlParser.Test();
         }
     }
 }
