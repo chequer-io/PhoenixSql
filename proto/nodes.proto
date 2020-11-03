@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package proto;
 
-option csharp_namespace = "PhoenixSql.Proto";
+option csharp_namespace = "PhoenixSql";
 option java_package = "com.chequer.phoenixsql.proto";
 
 import "common.proto";

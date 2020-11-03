@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace PhoenixSql.Proto
+namespace PhoenixSql
 {
     public partial class ToTimeParseNode : IFunctionParseNode
     {

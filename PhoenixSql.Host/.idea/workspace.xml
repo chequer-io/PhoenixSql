@@ -14,75 +14,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3c52d839-3ac5-4fc1-9221-254dc82c6011" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql.sln" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/J2NET.props" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/PhoenixSql.csproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/IAggregateFunctionParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/IBinaryParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/IBindableStatement.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/ICompoundParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/IDelegateConstantToCountParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/IFilterableStatement.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/IFunctionParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/INamedParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/IParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/ITerminalParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/IUnaryParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/AggregateFunctionParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/AggregateFunctionWithinGroupParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/AndParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/ArithmeticParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/ArrayModifierParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/AvgAggregateParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/BetweenParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/BindParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/CaseParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/CastParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/CeilParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/ColumnParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/ComparisonParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/CurrentDateParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/CurrentTimeParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/DistinctCountHyperLogLogAggregateParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/DistinctCountParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/ExistsParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/FamilyWildcardParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/FirstValueAggregateParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/FirstValuesAggregateParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/FloorParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/InListParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/InParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/IsNullParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/LastValueAggregateParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/LastValuesAggregateParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/LikeParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/LiteralParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/MaxAggregateParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/MinAggregateParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/NotParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/NthValueAggregateParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/OrParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/PhoenixRowTimestampParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/RegexpReplaceParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/RegexpSplitParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/RegexpSubstrParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/RoundParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/RowValueConstructorParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/SelectStatement.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/SequenceValueParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/StringConcatParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/SubqueryParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/SumAggregateParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/TableWildcardParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/ToCharParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/ToDateParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/ToNumberParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/ToTimeParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/ToTimestampParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/UDFParseNode.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../PhoenixSql/Proto/Nodes/WildcardParseNode.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../PhoenixSql/PhoenixSqlParser.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

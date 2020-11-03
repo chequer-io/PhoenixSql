@@ -1,4 +1,4 @@
-﻿namespace PhoenixSql.Proto
+﻿namespace PhoenixSql
 {
     // apache/phoenix/parse/BindableStatement.java
     public interface IBindableStatement

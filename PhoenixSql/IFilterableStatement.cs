@@ -1,6 +1,6 @@
 ﻿using Google.Protobuf.Collections;
 
-namespace PhoenixSql.Proto
+namespace PhoenixSql
 {
     // apache/phoenix/parse/FilterableStatement.java
     public interface IFilterableStatement : IBindableStatement

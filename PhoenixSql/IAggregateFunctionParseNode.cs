@@ -1,4 +1,4 @@
-﻿namespace PhoenixSql.Proto
+﻿namespace PhoenixSql
 {
     public interface IAggregateFunctionParseNode : IFunctionParseNode
     {
