@@ -28,6 +28,10 @@ public class MethodInfo {
         return method.getName();
     }
 
+    public String getFullName() {
+        return String.format("%s.%s", declaringType.getFullName(), method.getName());
+    }
+
     public TypeInfo getDeclaringType() {
         return declaringType;
     }

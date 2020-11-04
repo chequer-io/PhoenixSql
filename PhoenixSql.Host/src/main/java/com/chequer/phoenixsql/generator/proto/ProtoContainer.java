@@ -24,7 +24,7 @@ public abstract class ProtoContainer extends ProtoMember implements Iterable<Pro
     }
 
     public void add(int index, ProtoMember member) {
-        members.add(member);
+        members.add(index, member);
     }
 
     public void remove(ProtoMember member) {

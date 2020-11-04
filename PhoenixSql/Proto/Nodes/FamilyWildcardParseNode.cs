@@ -7,4 +7,3 @@ namespace PhoenixSql
         IReadOnlyList<IParseNode> IParseNode.Children => children_;
     }
 }
-

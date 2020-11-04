@@ -5,6 +5,23 @@ public class ProtoField extends ProtoMember {
     private ProtoType type;
     private String name;
 
+    public ProtoField() {
+    }
+
+    public ProtoField(String name, ProtoType type) {
+        this.name = name;
+        this.type = type;
+    }
+
+    public ProtoField(String name, ProtoScalaType type) {
+        this.name = name;
+        this.type = new ProtoType(type);
+    }
+
+    public ProtoField(String name, String type) {
+        this(name, new ProtoType(type, null));
+    }
+
     public boolean isRepeated() {
         return isRepeated;
     }

@@ -143,12 +143,18 @@ public class ProtoWriter {
         if (imports.size() > 0) {
             if (!first) {
                 appendLine();
+                appendLine();
             }
 
-            for (var importProto : imports) {
-                appendLine(String.format("import \"%s\";", importProto));
+            var importIterator = imports.iterator();
+
+            for (int i = 0; importIterator.hasNext(); i++) {
+                if (i > 0) {
+                    appendLine();
+                }
+
+                append(String.format("import \"%s\";", importIterator.next()));
             }
-            appendLine();
         }
 
         if (file.size() > 0 && !first) {

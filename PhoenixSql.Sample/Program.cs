@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace PhoenixSql.Sample
 {
@@ -6,9 +8,7 @@ namespace PhoenixSql.Sample
     {
         private static void Main(string[] args)
         {
-            FirstValueAggregateParseNode n;
-
-            PhoenixSqlParser.Test();
+            Console.WriteLine(typeof(List<int>).BaseType);
         }
     }
 }

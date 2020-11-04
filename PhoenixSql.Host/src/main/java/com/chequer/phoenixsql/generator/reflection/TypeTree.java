@@ -5,9 +5,15 @@ import java.util.function.Predicate;
 
 public class TypeTree {
     public final TypeTreeNode root;
+    private final Map<TypeInfo, TypeTreeNode> nodeMap;
 
-    private TypeTree(TypeTreeNode root) {
+    private TypeTree(TypeTreeNode root, Map<TypeInfo, TypeTreeNode> nodeMap) {
         this.root = root;
+        this.nodeMap = nodeMap;
+    }
+
+    public TypeTreeNode get(TypeInfo typeInfo) {
+        return nodeMap.getOrDefault(typeInfo, null);
     }
 
     public static TypeTree build(List<TypeInfo> typeInfos, Predicate<TypeInfo> buildNodePredicate) {
@@ -37,7 +43,7 @@ public class TypeTree {
                 }
             }
 
-            return new TypeTree(root);
+            return new TypeTree(root, typeMap);
         }
 
         private TypeTreeNode buildNode(TypeInfo typeInfo) {

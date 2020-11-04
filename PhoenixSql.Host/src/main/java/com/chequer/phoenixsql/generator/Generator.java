@@ -1,355 +1,544 @@
 package com.chequer.phoenixsql.generator;
 
 import com.chequer.phoenixsql.generator.proto.*;
-import com.google.common.reflect.ClassPath;
+import com.chequer.phoenixsql.generator.reflection.*;
+import org.apache.phoenix.expression.LiteralExpression;
 import org.apache.phoenix.parse.*;
-import org.reflections.Reflections;
-import org.reflections.scanners.MethodParameterScanner;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
+import org.apache.phoenix.schema.PTableKey;
 
 import java.io.File;
-import java.io.StringWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
 public class Generator {
     private static String javaProjectDir;
-    private static String csharpProjectDir;
-    private static String protoDir;
+    private static File csharpNodeDir;
+    private static File protoFile;
 
-    private static ProtoFile protoFile;
-    private static Map<Class<?>, List<ProtoField>> abstractsFields;
-    private static Map<Class<?>, ProtoMessage> messages;
+    private static ProtoFile proto;
+    private static TypeTree typeTree;
 
-    private static final List<String> excludeProperties = new ArrayList<>() {{
+    private static final ProtoType udfMapEntryProtoType = new ProtoType("UDFMapEntry", null);
+
+    private static final TypeInfo listTypeInfo = TypeInfo.get(List.class);
+    private static final TypeInfo mapTypeInfo = TypeInfo.get(Map.class);
+    private static final TypeInfo hbasePairType = TypeInfo.get(org.apache.hadoop.hbase.util.Pair.class);
+    private static final TypeInfo literalExpression = TypeInfo.get(LiteralExpression.class);
+
+    private static final List<TypeInfo> additionalGenerateTypes = new ArrayList<>() {{
+        add(TypeInfo.get(PrimaryKeyConstraint.class));
+        add(TypeInfo.get(TableName.class));
+        add(TypeInfo.get(ColumnName.class));
+        add(TypeInfo.get(ColumnDef.class));
+        add(TypeInfo.get(IndexKeyConstraint.class));
+        add(TypeInfo.get(PFunction.class));
+        add(TypeInfo.get(PFunction.FunctionArgument.class));
+        add(TypeInfo.get(PTableKey.class));
+        add(TypeInfo.get(CursorName.class));
+    }};
+
+    private static final Set<String> excludeProperties = new HashSet<>() {{
         add("org.apache.phoenix.parse.BinaryParseNode.getLHS");
         add("org.apache.phoenix.parse.BinaryParseNode.getRHS");
-        add("*.isStateless");
+        add("org.apache.phoenix.parse.FunctionParseNode.getInfo");
+        add("org.apache.phoenix.parse.LiteralParseNode.getBytes");
+        add("org.apache.phoenix.parse.HintNode.isEmpty");
+        add("org.apache.phoenix.parse.ColumnName.getColumnName");
+        add("org.apache.phoenix.parse.ColumnName.getFamilyName");
+
+        add("org.apache.phoenix.parse.AddColumnStatement.getProps");
+        add("org.apache.phoenix.parse.AlterIndexStatement.getProps");
+        add("org.apache.phoenix.parse.CreateTableStatement.getProps");
+        add("org.apache.phoenix.parse.CreateIndexStatement.getProps");
+        add("org.apache.phoenix.parse.AlterSessionStatement.getProps");
+        add("org.apache.phoenix.parse.UpdateStatisticsStatement.getProps");
     }};
 
-    private static final Map<Class<?>, ProtoType> protoScalarTypes = new HashMap<>() {{
-        put(double.class, new ProtoType(ProtoScalaType.DOUBLE));
-        put(Double.class, new ProtoType(ProtoScalaType.DOUBLE));
-        put(float.class, new ProtoType(ProtoScalaType.FLOAT));
-        put(Float.class, new ProtoType(ProtoScalaType.FLOAT));
-        put(int.class, new ProtoType(ProtoScalaType.INT32));
-        put(Integer.class, new ProtoType(ProtoScalaType.INT32));
-        put(long.class, new ProtoType(ProtoScalaType.INT64));
-        put(Long.class, new ProtoType(ProtoScalaType.INT64));
-        put(boolean.class, new ProtoType(ProtoScalaType.BOOL));
-        put(Boolean.class, new ProtoType(ProtoScalaType.BOOL));
-        put(String.class, new ProtoType(ProtoScalaType.STRING));
-        put(byte[].class, new ProtoType(ProtoScalaType.BYTES));
+    private static final Map<TypeInfo, ProtoType> protoScalarTypes = new HashMap<>() {{
+        put(TypeInfo.get(double.class), new ProtoType(ProtoScalaType.DOUBLE));
+        put(TypeInfo.get(Double.class), new ProtoType(ProtoScalaType.DOUBLE));
+        put(TypeInfo.get(float.class), new ProtoType(ProtoScalaType.FLOAT));
+        put(TypeInfo.get(Float.class), new ProtoType(ProtoScalaType.FLOAT));
+        put(TypeInfo.get(short.class), new ProtoType(ProtoScalaType.INT32));
+        put(TypeInfo.get(Short.class), new ProtoType(ProtoScalaType.INT32));
+        put(TypeInfo.get(int.class), new ProtoType(ProtoScalaType.INT32));
+        put(TypeInfo.get(Integer.class), new ProtoType(ProtoScalaType.INT32));
+        put(TypeInfo.get(long.class), new ProtoType(ProtoScalaType.INT64));
+        put(TypeInfo.get(Long.class), new ProtoType(ProtoScalaType.INT64));
+        put(TypeInfo.get(boolean.class), new ProtoType(ProtoScalaType.BOOL));
+        put(TypeInfo.get(Boolean.class), new ProtoType(ProtoScalaType.BOOL));
+        put(TypeInfo.get(String.class), new ProtoType(ProtoScalaType.STRING));
+        put(TypeInfo.get(Object.class), new ProtoType("google.protobuf.Any", "google/protobuf/any.proto"));
     }};
+
+    private static final Map<String, String> csScalarTypes = new HashMap<>() {{
+        put(ProtoScalaType.DOUBLE.value, "double");
+        put(ProtoScalaType.FLOAT.value, "float");
+        put(ProtoScalaType.INT32.value, "int");
+        put(ProtoScalaType.INT64.value, "long");
+        put(ProtoScalaType.BOOL.value, "bool");
+        put(ProtoScalaType.STRING.value, "string");
+    }};
+
+    private static final Map<TypeInfo, GenerateData> generateData = new HashMap<>();
 
     public static void main(String[] args) throws Exception {
         javaProjectDir = System.getProperty("user.dir");
-        csharpProjectDir = new File(javaProjectDir, "../PhoenixSql").getCanonicalPath();
-        protoDir = new File(javaProjectDir, "../proto").getCanonicalPath();
+        csharpNodeDir = new File(javaProjectDir, "../PhoenixSql/Proto/Nodes");
+        protoFile = new File(javaProjectDir, "../proto/nodes.proto");
 
-        protoFile = new ProtoFile();
-        protoFile.setSyntax("proto3");
-        protoFile.setPackageName("proto");
-        protoFile.options().put("csharp_namespace", "PhoenixSql");
-        protoFile.options().put("java_package", "com.chequer.phoenixsql.proto");
+        proto = new ProtoFile();
+        proto.setSyntax("proto3");
+        proto.setPackageName("proto");
+        proto.options().put("csharp_namespace", "PhoenixSql");
+        proto.options().put("java_package", "com.chequer.phoenixsql.proto");
 
-        abstractsFields = new HashMap<>();
-        messages = new HashMap<>();
+        proto.add(createPDataType());
+        proto.add(createPName());
+        proto.add(createUDFMapEntry());
 
         generate();
 
-        var writer = new StringWriter();
-        var protoWriter = new ProtoWriter(writer);
-        protoWriter.write(protoFile);
-
-        System.out.println("--------------------------------------------------------------------");
-        System.out.println(writer);
-    }
-
-    public static void generate() throws Exception {
-        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-        var r = new Reflections(new ConfigurationBuilder()
-                .setUrls(ClasspathHelper.forPackage("org.apache.phoenix.parse"))
-                .setScanners(new SubTypesScanner())
-                .setExecutorService(Executors.newFixedThreadPool(4)));
-
-        var d = r.getSubTypesOf(ParseNode.class);
-        ClassPath.from(loader).getTopLevelClasses()
-                .stream()
-                .filter(i -> i.getName().startsWith("org.apache.phoenix.parse."))
-                .map(ClassPath.ClassInfo::load)
-                .sorted((o1, o2) -> {
-                    var modifier1 = Modifier.isAbstract(o1.getModifiers());
-                    var modifier2 = Modifier.isAbstract(o2.getModifiers());
-
-                    if (modifier1 != modifier2) {
-                        return modifier1 ? -1 : 1;
-                    }
-
-                    int level1 = getInheritanceLevel(o1);
-                    int level2 = getInheritanceLevel(o2);
-
-                    if (level1 != level2) {
-                        return level1 < level2 ? -1 : 1;
-                    }
-
-                    return 0;
-                })
-                .forEach(clazz -> {
-                    final String name = clazz.getName();
-
-                    if (ParseNode.class.isAssignableFrom(clazz)) {
-                        generateParseNode(clazz);
-                    } else if (name.endsWith("Node")) {
-                        generateNode(clazz);
-                    }
-                });
-    }
-
-    private static void generateNode(Class<?> clazz) {
-        if (messages.containsKey(clazz)) {
-            return;
+        if (protoFile.exists()) {
+            protoFile.delete();
         }
 
-        var isAbstract = Modifier.isAbstract(clazz.getModifiers());
-        var messageName = getProtoMessageName(clazz);
+        var writer = new FileWriter(protoFile);
+        var protoWriter = new ProtoWriter(writer);
+        protoWriter.write(proto);
+        writer.close();
 
-        var message = new ProtoMessage(messageName);
-        message.setComment(new ProtoSingLineComment(clazz.getCanonicalName()));
+        writeCSharpInterfaces();
+    }
 
-        protoFile.add(message);
-        messages.put(clazz, message);
+    private static ProtoEnum createPDataType() {
+        var protoEnum = new ProtoEnum("PDataType");
+        var values = protoEnum.values();
+        values.add("PUnsignedDate");
+        values.add("PArrayDataType");
+        values.add("PBinaryBase");
+        values.add("PBoolean");
+        values.add("PChar");
+        values.add("PDate");
+        values.add("PNumericType");
+        values.add("PTime");
+        values.add("PTimestamp");
+        values.add("PUnsignedTime");
+        values.add("PVarchar");
 
-//         if (clazz.getSuperclass() != Object.class) {
-//            // TODO: non abstract class
+        return protoEnum;
+    }
+
+    private static ProtoMessage createPName() {
+        var message = new ProtoMessage("PName");
+        message.add(new ProtoField("value", ProtoScalaType.STRING));
+        return message;
+    }
+
+    // Map<String, UDFParseNode>
+    private static ProtoMessage createUDFMapEntry() {
+        var message = new ProtoMessage("UDFMapEntry");
+        message.add(new ProtoField("key", ProtoScalaType.STRING));
+        message.add(new ProtoField("value", "UDFParseNode"));
+        return message;
+    }
+
+    private static void generate() throws Exception {
+        var generateTypes = Reflections.getTopLevelClasses("org.apache.phoenix.parse")
+                .stream()
+                .filter(i -> i.getName().endsWith("Node") || i.getName().endsWith("Statement"))
+                .map(i -> TypeInfo.get(i.load()));
+
+        var types = Stream.concat(additionalGenerateTypes.stream(), generateTypes)
+                .filter(t -> !t.isNative())
+                .collect(Collectors.toList());
+
+        typeTree = TypeTree.build(types, Generator::isPhoenixType);
+
+        generate(typeTree.root);
+    }
+
+    private static void writeCSharpInterfaces() throws IOException {
+        System.out.println("---------");
+
+//        if (csharpNodeDir.exists()) {
+//            csharpNodeDir.delete();
 //        }
 
-        var fields = createProtoFields(clazz);
+        csharpNodeDir.mkdir();
 
-        if (isAbstract) {
-            System.out.printf("%s (abstract)%n", clazz.getSimpleName());
+        for (final var data : generateData.values()) {
+            if (data.csTypeName == null) {
+                continue;
+            }
 
-            abstractsFields.put(clazz, fields);
+            var csFile = Paths.get(csharpNodeDir.getCanonicalPath(), data.csTypeName + ".cs").toAbsolutePath().toString();
+            var csWriter = new FileWriter(csFile);
 
-            var oneOfField = new ProtoFieldOneOf();
-            oneOfField.setName("inherit");
+            var baseData = generateData.getOrDefault(data.type.getBaseType(), null);
 
-            message.add(oneOfField);
+            csWriter.write("using System.Collections.Generic;\n\n");
+            csWriter.write("namespace PhoenixSql\n");
+            csWriter.write("{\n");
+
+            if (data.csInterface) {
+                csWriter.write(String.format("    public interface %s", data.csTypeName));
+
+                if (baseData != null) {
+                    csWriter.write(" : ");
+                    csWriter.write(baseData.csTypeName);
+                }
+
+                csWriter.write('\n');
+                csWriter.write("    {\n");
+
+                for (int i = 0; i < data.csProperties.size(); i++) {
+                    if (i > 0) {
+                        csWriter.write("\n");
+                    }
+
+                    var property = data.csProperties.get(i);
+                    csWriter.write(String.format("        %s %s { get; }\n", property.type, property.name));
+                }
+
+                csWriter.write("    }\n");
+            } else {
+                csWriter.write(String.format("    public partial class %s", data.csTypeName));
+
+                if (baseData != null) {
+                    csWriter.write(" : ");
+                    csWriter.write(baseData.csTypeName);
+                }
+
+                csWriter.write('\n');
+                csWriter.write("    {\n");
+
+                if (ParseNode.class.isAssignableFrom(data.type.unwrap())) {
+                    csWriter.write("        IReadOnlyList<IParseNode> IParseNode.Children => children_;\n");
+                }
+
+                csWriter.write("    }\n");
+            }
+
+            csWriter.write("}\n");
+
+            csWriter.close();
+        }
+    }
+
+    private static void generate(TypeTreeNode node) {
+        if (node.typeInfo != null) {
+            if (generateData.containsKey(node.typeInfo)) {
+                return;
+            }
+
+            var data = new GenerateData(node.typeInfo);
+            data.message = new ProtoMessage(getProtoMessageName(node));
+
+            generateData.put(node.typeInfo, data);
+
+            List<GenerateData> inheritMap = new ArrayList<>();
+
+            if (!node.hasChildren()) {
+                var parentNode = node.getParent();
+
+                while (parentNode != null) {
+                    inheritMap.add(0, generateData.get(parentNode.typeInfo));
+                    parentNode = parentNode.getParent();
+                }
+
+                for (final var inherit : inheritMap) {
+                    for (final var inheritField : inherit.inheritMembers) {
+                        data.message.add(inheritField);
+                    }
+                }
+            }
+
+            var protoMembers = new ArrayList<ProtoMember>();
+            var csProperties = new ArrayList<CSharpPropertyInfo>();
+
+            protoMembers.add(new ProtoSingLineComment(node.typeInfo.getFullName()));
+
+            System.out.println(node.typeInfo.getName());
+
+            for (final var property : getProperties(node.typeInfo)) {
+                var protoField = new ProtoField();
+                var returnType = property.getReturnType();
+
+                if (returnType.isArray()) {
+                    returnType = returnType.getElementType();
+                    protoField.setRepeated(true);
+                } else if (listTypeInfo.isAssignableFrom(returnType)) {
+                    var genericReturnType = TypeInfo.get((ParameterizedType) property.getGenericReturnType());
+                    returnType = genericReturnType.getGenericTypeArguments().get(0);
+                    protoField.setRepeated(true);
+                }
+
+                ProtoType protoType = null;
+
+                if (mapTypeInfo.isAssignableFrom(returnType) && property.getName().equals("getUdfParseNodes")) {
+                    protoField.setRepeated(true);
+                    protoType = udfMapEntryProtoType;
+                }
+
+                if (protoType == null) {
+                    protoType = resolveProtoType(data.message, returnType);
+                }
+
+                protoField.setType(protoType);
+                protoField.setName(getProtoFieldName(property));
+
+                protoMembers.add(protoField);
+                csProperties.add(new CSharpPropertyInfo(
+                        getCSharpTypeName(returnType, protoType, protoField.isRepeated()),
+                        getCSharpPropertyName(property)));
+
+                System.out.printf(" * %s %s%n", protoType.getName(), protoField.getName());
+            }
+
+            if (node.hasChildren()) {
+                data.inheritMembers = protoMembers;
+
+                data.csInterface = true;
+                data.csTypeName = getCSharpTypeName(node.typeInfo, null, false);
+                data.csProperties = csProperties;
+
+                data.inheritField = new ProtoFieldOneOf();
+                data.inheritField.setName("inherit");
+
+                data.message.add(data.inheritField);
+            } else {
+                data.csTypeName = data.message.getName();
+
+                for (final var protoField : protoMembers) {
+                    data.message.add(protoField);
+                }
+
+                for (final var inheritData : inheritMap) {
+                    var protoField = new ProtoField();
+                    protoField.setType(new ProtoType(data.message.getName(), null));
+                    protoField.setName("i" + (inheritData.inheritField.fields().size() + 1));
+
+                    inheritData.inheritField.fields().add(protoField);
+                }
+            }
+
+            proto.add(data.message);
+        }
+
+        for (final var childNode : node.children) {
+            generate(childNode);
+        }
+    }
+
+    private static ProtoType resolveProtoType(ProtoMessage holder, TypeInfo returnType) {
+        var returnTypeNode = typeTree.get(returnType);
+
+        if (returnType.getName().equals("Action")) {
+            System.out.println(returnType.isEnum());
+        }
+
+        if (returnTypeNode != null) {
+            return new ProtoType(getProtoMessageName(returnTypeNode), null);
+        }
+
+        if (generateData.containsKey(returnType)) {
+            return generateData.get(returnType).getProtoType();
+        }
+
+        if (protoScalarTypes.containsKey(returnType)) {
+            return protoScalarTypes.get(returnType);
+        }
+
+        if (returnType.isEnum()) {
+            var enumMessage = generateGlobalEnum(returnType);
+            return new ProtoType(enumMessage.getName(), null);
+        }
+
+        if (hbasePairType.isAssignableFrom(returnType)) {
+            var pairMessage = generatePair(returnType);
+
+            if (holder != null) {
+                holder.add(0, pairMessage);
+            }
+
+            return new ProtoType(pairMessage.getName(), null);
+        }
+
+        if (literalExpression.equals(returnType)) {
+            return new ProtoType(ProtoScalaType.STRING);
+        }
+
+        return new ProtoType(returnType.getName(), null);
+    }
+
+    private static ProtoMessage generatePair(TypeInfo pairType) {
+        var t1 = pairType.getGenericTypeArguments().get(0);
+        var t2 = pairType.getGenericTypeArguments().get(1);
+
+        var name = String.format("Pair_%s_%s", t1.getName(), t2.getName());
+        var message = new ProtoMessage(name);
+
+        var t1Type = resolveProtoType(message, t1);
+        var t2Type = resolveProtoType(message, t2);
+
+        message.add(new ProtoField().setName("first").setType(t1Type));
+        message.add(new ProtoField().setName("second").setType(t2Type));
+
+        return message;
+    }
+
+    private static ProtoEnum generateGlobalEnum(TypeInfo enumType) {
+        var data = new GenerateData(enumType);
+        data.enumMessage = new ProtoEnum(enumType.getName());
+
+        for (final var field : enumType.unwrap().getFields()) {
+            if (Modifier.isPublic(field.getModifiers())) {
+                data.enumMessage.values().add(field.getName());
+            }
+        }
+
+        generateData.put(enumType, data);
+        proto.add(0, data.enumMessage);
+
+        return data.enumMessage;
+    }
+
+    private static String getProtoMessageName(TypeTreeNode node) {
+        var name = node.typeInfo.getName();
+
+        if (node.typeInfo.isInterface()) {
+            return "I_" + name;
+        }
+
+        if (node.hasChildren()) {
+            return "W_" + name;
+        }
+
+        return name;
+    }
+
+    private static String getProtoFieldName(MethodInfo methodInfo) {
+        var name = methodInfo.getName();
+
+        if (name.startsWith("get")) {
+            name = Character.toLowerCase(name.charAt(3)) + name.substring(4);
+        }
+
+        return name;
+    }
+
+    private static String getCSharpTypeName(TypeInfo typeInfo, ProtoType type, boolean repeated) {
+        var typeNode = typeTree.get(typeInfo);
+
+        if (type == udfMapEntryProtoType && repeated) {
+            return "IReadOnlyList<UDFMapEntry>";
+        }
+
+        String name;
+
+        if (typeInfo.isInterface() || typeNode != null && typeNode.hasChildren()) {
+            name = "I" + typeInfo.getName();
+        } else if (type != null) {
+            name = csScalarTypes.getOrDefault(type.getName(), type.getName());
         } else {
-            System.out.println(clazz.getSimpleName());
-
-            var classMap = getClassMap(clazz);
-
-            for (int i = 0; i < classMap.length - 1; i++) {
-                if (abstractsFields.containsKey(classMap[i])) {
-                    var abstractMessage = messages.getOrDefault(classMap[i], null);
-
-                    if (abstractMessage != null) {
-                        var fieldOneOf = (ProtoFieldOneOf) abstractMessage.get(0);
-                        var field = new ProtoField();
-
-                        fieldOneOf.fields().add(field);
-
-                        field.setType(new ProtoType(messageName, null));
-                        field.setName("_" + fieldOneOf.fields().size());
-                    }
-                }
-
-                var absFields = abstractsFields.getOrDefault(classMap[i], null);
-
-                if (absFields != null) {
-                    for (final var absField : absFields) {
-                        message.add(absField);
-                    }
-                }
-            }
-
-            for (final var field : fields) {
-                message.add(field);
-            }
-        }
-    }
-
-    private static void generateParseNode(Class<?> clazz) {
-        generateNode(clazz);
-
-        // TODO: implement
-    }
-
-    private static List<ProtoField> createProtoFields(Class<?> clazz) {
-        var fields = new ArrayList<ProtoField>();
-
-        for (final var method : getProperties(clazz)) {
-            var fieldName = method.getName();
-
-            // getName -> name
-            if (fieldName.startsWith("get")) {
-                fieldName = convertToCamelCase(fieldName.substring(3));
-            }
-
-            var protoField = new ProtoField();
-            protoField.setName(fieldName);
-
-            var returnType = method.getReturnType();
-
-            if (List.class.isAssignableFrom(returnType)) {
-                var parameterizedType = (ParameterizedType) method.getGenericReturnType();
-                returnType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
-
-                protoField.setRepeated(true);
-            }
-
-//            if (returnType.isArray() || Iterable.class.isAssignableFrom(returnType)) {
-//                throw new Exception("not supported type");
-//            }
-
-            var protoType = protoScalarTypes.getOrDefault(returnType, null);
-
-            if (protoType == null) {
-                if (returnType.isEnum()) {
-                    // TODO:
-                    continue;
-                } else {
-                    protoType = new ProtoType(getProtoMessageName(returnType), null);
-                }
-            }
-
-            protoField.setType(protoType);
-
-            fields.add(protoField);
+            name = typeInfo.getName();
         }
 
-        return fields;
-    }
-
-    private static String getProtoMessageName(Class<?> clazz) {
-        var messageName = clazz.getSimpleName();
-
-        if (Modifier.isAbstract(clazz.getModifiers())) {
-            messageName += "Abs";
+        if (repeated) {
+            name = String.format("IReadOnlyList<%s>", name);
         }
 
-        return messageName;
+        return name;
     }
 
-    private static int getInheritanceLevel(Class<?> clazz) {
-        int level = 0;
+    private static String getCSharpPropertyName(MethodInfo methodInfo) {
+        var name = methodInfo.getName();
 
-        while (clazz != null && clazz != Object.class) {
-            level++;
-            clazz = clazz.getSuperclass();
+        if (name.startsWith("is")) {
+            name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+        } else {
+            name = name.substring(3);
         }
 
-        return level;
+        return name;
     }
 
-    private static Class<?>[] getClassMap(Class<?> clazz) {
-        var queue = new LinkedList<Class<?>>();
-
-        while (clazz != null && clazz != Object.class) {
-            queue.push(clazz);
-            clazz = clazz.getSuperclass();
+    private static boolean isPhoenixType(TypeInfo typeInfo) {
+        if (typeInfo == null) {
+            return false;
         }
 
-        var buffer = new Class<?>[queue.size()];
-        queue.toArray(buffer);
-
-        return buffer;
+        return typeInfo.getPackageName().startsWith("org.apache.phoenix");
     }
 
-    private static Method[] getProperties(Class<?> clazz) {
-        var list = new ArrayList<Method>();
+    private static List<MethodInfo> getProperties(TypeInfo typeInfo) {
+        var properties = new ArrayList<MethodInfo>();
 
-        for (final var method : clazz.getDeclaredMethods()) {
-            if (Modifier.isStatic(method.getModifiers())) {
+        for (final var methodInfo : typeInfo.getDeclaredMethods()) {
+            if (methodInfo.isStatic() || !methodInfo.isPublic() || methodInfo.getParameterCount() > 0) {
                 continue;
             }
 
-            if (method.getParameterCount() > 0) {
-                continue;
-            }
-
-            var type = method.getReturnType();
-            var name = method.getName();
-
-            if (type == Void.class) {
-                continue;
-            }
+            var name = methodInfo.getName();
 
             if (!name.startsWith("get") && !name.startsWith("is")) {
                 continue;
             }
 
-            var path = String.format("%s.%s", clazz.getCanonicalName(), method.getName());
-
-            if (excludeProperties.stream().anyMatch(p -> isMatch(path, p))) {
+            if (methodInfo.getBaseDefinition() != null) {
                 continue;
             }
 
-            if (isOverrideMethod(method)) {
+            if (excludeProperties.contains(methodInfo.getFullName())) {
                 continue;
             }
 
-            list.add(method);
+            properties.add(methodInfo);
         }
 
-        var buffer = new Method[list.size()];
-        list.toArray(buffer);
-
-        return buffer;
+        return properties;
     }
 
-    private static boolean isOverrideMethod(Method method) {
-        var superClazz = method.getDeclaringClass().getSuperclass();
+    private static class GenerateData {
+        public final TypeInfo type;
+        public ProtoMessage message;
+        public ProtoEnum enumMessage;
 
-        try {
-            var superMethod = superClazz.getMethod(method.getName());
-            return superMethod.getReturnType() == method.getReturnType();
-        } catch (NoSuchMethodException e) {
-            return false;
+        public List<ProtoMember> inheritMembers;
+        public ProtoFieldOneOf inheritField;
+
+        public boolean csInterface;
+        public String csTypeName;
+        public List<CSharpPropertyInfo> csProperties;
+
+        public GenerateData(TypeInfo type) {
+            this.type = type;
         }
-    }
 
-    private static String convertToCamelCase(String value) {
-        return Character.toLowerCase(value.charAt(0)) + value.substring(1);
-    }
-
-    private static boolean isMatch(String s, String p) {
-        int i = 0;
-        int j = 0;
-        int starIndex = -1;
-        int iIndex = -1;
-
-        while (i < s.length()) {
-            if (j < p.length() && (p.charAt(j) == '?' || p.charAt(j) == s.charAt(i))) {
-                ++i;
-                ++j;
-            } else if (j < p.length() && p.charAt(j) == '*') {
-                starIndex = j;
-                iIndex = i;
-                j++;
-            } else if (starIndex != -1) {
-                j = starIndex + 1;
-                i = iIndex + 1;
-                iIndex++;
-            } else {
-                return false;
+        public ProtoType getProtoType() {
+            if (message != null) {
+                return new ProtoType(message.getName(), null);
             }
-        }
 
-        while (j < p.length() && p.charAt(j) == '*') {
-            ++j;
+            return new ProtoType(enumMessage.getName(), null);
         }
+    }
 
-        return j == p.length();
+    private static class CSharpPropertyInfo {
+        public final String type;
+        public final String name;
+
+        private CSharpPropertyInfo(String type, String name) {
+            this.type = type;
+            this.name = name;
+        }
     }
 }
