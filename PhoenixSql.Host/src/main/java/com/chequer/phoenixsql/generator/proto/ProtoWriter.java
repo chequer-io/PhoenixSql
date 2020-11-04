@@ -2,15 +2,13 @@ package com.chequer.phoenixsql.generator.proto;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Stack;
+import java.util.*;
 
 public class ProtoWriter {
     private final Writer writer;
     private int depth;
     private final Stack<IndexHandler> indexHandlerStack = new Stack<>();
+    private final Map<String, Integer> enumMap = new HashMap<>();
 
     public ProtoWriter(Writer writer) {
         this.writer = writer;
@@ -238,8 +236,17 @@ public class ProtoWriter {
         var values = protoEnum.values();
 
         for (int i = 0; i < values.size(); i++) {
+            var value = values.get(i);
+            int enumCount = enumMap.getOrDefault(value, 0);
+
+            if (enumCount > 0) {
+                value = value + "_" + enumCount;
+            }
+
+            enumMap.put(value, ++enumCount);
+
             appendIndent();
-            appendLine(String.format("%s = %d;", values.get(i), i));
+            appendLine(String.format("%s = %d;", value, i));
         }
 
         depth--;

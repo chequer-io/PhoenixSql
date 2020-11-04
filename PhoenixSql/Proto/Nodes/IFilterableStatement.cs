@@ -1,23 +1,21 @@
-using System.Collections.Generic;
-
 namespace PhoenixSql
 {
     public interface IFilterableStatement : IBindableStatement
     {
-        OffsetNode Offset { get; }
-
-        double TableSamplingRate { get; }
-
         HintNode Hint { get; }
-
-        bool IsDistinct { get; }
-
-        IParseNode Where { get; }
 
         LimitNode Limit { get; }
 
+        OffsetNode Offset { get; }
+
+        Google.Protobuf.Collections.RepeatedField<OrderByNode> OrderBy { get; }
+
+        double TableSamplingRate { get; }
+
+        IParseNode Where { get; }
+
         bool IsAggregate { get; }
 
-        IReadOnlyList<OrderByNode> OrderBy { get; }
+        bool IsDistinct { get; }
     }
 }

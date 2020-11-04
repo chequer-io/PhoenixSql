@@ -1,12 +1,11 @@
 package com.chequer.phoenixsql.generator.reflection;
 
-import com.google.common.base.Objects;
-import org.apache.phoenix.parse.SelectStatement;
-
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TypeInfo {
     private final static Map<Class<?>, TypeInfo> typeInfos = new HashMap<>();
@@ -72,7 +71,7 @@ public class TypeInfo {
             baseType = TypeInfo.get(clazz.getSuperclass());
         }
 
-        if (baseType == null || baseType.clazz == Object.class  && !clazz.isInterface()) {
+        if (baseType == null || baseType.clazz == Object.class && !clazz.isInterface()) {
             var interfaces = clazz.getInterfaces();
 
             if (interfaces.length == 1) {
@@ -107,11 +106,10 @@ public class TypeInfo {
 
     public List<MethodInfo> getMethods() {
         if (methods == null) {
-            methods = new ArrayList<>();
-
-            for (final var method : clazz.getMethods()) {
-                methods.add(new MethodInfo(method));
-            }
+            methods = Arrays.stream(clazz.getMethods())
+                    .sorted(Comparator.comparing(Method::getName))
+                    .map(MethodInfo::new)
+                    .collect(Collectors.toList());
         }
 
         return Collections.unmodifiableList(methods);

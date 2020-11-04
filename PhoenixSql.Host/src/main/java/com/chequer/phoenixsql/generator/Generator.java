@@ -168,10 +168,6 @@ public class Generator {
     private static void writeCSharpInterfaces() throws IOException {
         System.out.println("---------");
 
-//        if (csharpNodeDir.exists()) {
-//            csharpNodeDir.delete();
-//        }
-
         csharpNodeDir.mkdir();
 
         for (final var data : generateData.values()) {
@@ -182,18 +178,33 @@ public class Generator {
             var csFile = Paths.get(csharpNodeDir.getCanonicalPath(), data.csTypeName + ".cs").toAbsolutePath().toString();
             var csWriter = new FileWriter(csFile);
 
-            var baseData = generateData.getOrDefault(data.type.getBaseType(), null);
+            var typeNode = typeTree.get(data.type);
+            var inheritMap = new ArrayList<GenerateData>();
 
-            csWriter.write("using System.Collections.Generic;\n\n");
+            if (typeNode != null) {
+                var parentNode = typeNode.getParent();
+
+                while (parentNode != null) {
+                    inheritMap.add(0, generateData.get(parentNode.typeInfo));
+                    parentNode = parentNode.getParent();
+                }
+
+                for (final var inherit : inheritMap) {
+                    for (final var inheritField : inherit.inheritMembers) {
+                        data.message.add(inheritField);
+                    }
+                }
+            }
+
             csWriter.write("namespace PhoenixSql\n");
             csWriter.write("{\n");
 
             if (data.csInterface) {
                 csWriter.write(String.format("    public interface %s", data.csTypeName));
 
-                if (baseData != null) {
+                if (!inheritMap.isEmpty()) {
                     csWriter.write(" : ");
-                    csWriter.write(baseData.csTypeName);
+                    csWriter.write(inheritMap.get(inheritMap.size() - 1).csTypeName);
                 }
 
                 csWriter.write('\n');
@@ -212,16 +223,24 @@ public class Generator {
             } else {
                 csWriter.write(String.format("    public partial class %s", data.csTypeName));
 
-                if (baseData != null) {
+                if (!inheritMap.isEmpty()) {
                     csWriter.write(" : ");
-                    csWriter.write(baseData.csTypeName);
+                    csWriter.write(inheritMap.get(inheritMap.size() - 1).csTypeName);
                 }
 
                 csWriter.write('\n');
                 csWriter.write("    {\n");
 
-                if (ParseNode.class.isAssignableFrom(data.type.unwrap())) {
-                    csWriter.write("        IReadOnlyList<IParseNode> IParseNode.Children => children_;\n");
+                for (final var baseData : inheritMap) {
+                    for (final var baseProperty : baseData.csProperties) {
+                        if (baseProperty.type.contains("IParseNode")) {
+                            csWriter.write(String.format("        %s %s.%s => %s;\n",
+                                    baseProperty.type,
+                                    baseData.csTypeName,
+                                    baseProperty.name,
+                                    baseProperty.name));
+                        }
+                    }
                 }
 
                 csWriter.write("    }\n");
@@ -438,13 +457,11 @@ public class Generator {
     private static String getCSharpTypeName(TypeInfo typeInfo, ProtoType type, boolean repeated) {
         var typeNode = typeTree.get(typeInfo);
 
-        if (type == udfMapEntryProtoType && repeated) {
-            return "IReadOnlyList<UDFMapEntry>";
-        }
-
         String name;
 
-        if (typeInfo.isInterface() || typeNode != null && typeNode.hasChildren()) {
+        if (type == udfMapEntryProtoType) {
+            name = udfMapEntryProtoType.getName();
+        } else if (typeInfo.isInterface() || typeNode != null && typeNode.hasChildren()) {
             name = "I" + typeInfo.getName();
         } else if (type != null) {
             name = csScalarTypes.getOrDefault(type.getName(), type.getName());
@@ -453,7 +470,11 @@ public class Generator {
         }
 
         if (repeated) {
-            name = String.format("IReadOnlyList<%s>", name);
+            if (typeInfo.unwrap() == ParseNode.class) {
+                name = "System.Collections.Generic.IReadOnlyList<IParseNode>";
+            } else {
+                name = String.format("Google.Protobuf.Collections.RepeatedField<%s>", name);
+            }
         }
 
         return name;

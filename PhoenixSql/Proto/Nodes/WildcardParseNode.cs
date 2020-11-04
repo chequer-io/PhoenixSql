@@ -1,9 +1,7 @@
-using System.Collections.Generic;
-
 namespace PhoenixSql
 {
     public partial class WildcardParseNode : ITerminalParseNode
     {
-        IReadOnlyList<IParseNode> IParseNode.Children => children_;
+        System.Collections.Generic.IReadOnlyList<IParseNode> IParseNode.Children => Children;
     }
 }

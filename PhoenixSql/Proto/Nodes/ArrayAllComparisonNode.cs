@@ -1,9 +1,7 @@
-using System.Collections.Generic;
-
 namespace PhoenixSql
 {
     public partial class ArrayAllComparisonNode : IArrayAllAnyComparisonNode
     {
-        IReadOnlyList<IParseNode> IParseNode.Children => children_;
+        System.Collections.Generic.IReadOnlyList<IParseNode> IParseNode.Children => Children;
     }
 }
