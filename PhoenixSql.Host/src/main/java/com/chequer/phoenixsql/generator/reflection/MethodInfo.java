@@ -20,6 +20,10 @@ public class MethodInfo {
         }
     }
 
+    public Method unwrap() {
+        return method;
+    }
+
     public String getName() {
         return method.getName();
     }
@@ -46,6 +50,10 @@ public class MethodInfo {
 
     public Type getGenericReturnType() {
         return method.getGenericReturnType();
+    }
+
+    public int getModifier() {
+        return modifier;
     }
 
     public boolean isNative() {

@@ -79,6 +79,10 @@ public class TypeInfo {
         return null;
     }
 
+    public int getModifier() {
+        return modifier;
+    }
+
     public boolean isInstanceOf(Object instance) {
         return isAssignableFrom(instance.getClass());
     }
