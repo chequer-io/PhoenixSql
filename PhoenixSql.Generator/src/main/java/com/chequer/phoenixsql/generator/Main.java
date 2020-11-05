@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
-public class Generator {
+
+public class Main {
     private static String javaProjectDir;
     private static File csharpNodeDir;
     private static File protoFile;
@@ -160,7 +161,7 @@ public class Generator {
                 .filter(t -> !t.isNative())
                 .collect(Collectors.toList());
 
-        typeTree = TypeTree.build(types, Generator::isPhoenixType);
+        typeTree = TypeTree.build(types, Main::isPhoenixType);
 
         generate(typeTree.root);
     }

@@ -18,7 +18,19 @@
         <Protobuf Include="..\proto\**\*.proto" Exclude="..\proto\google\**\*.proto" ProtoRoot="..\proto">
             <Link>Proto\src\%(RecursiveDir)%(FileName)%(Extension)</Link>
         </Protobuf>
+
+        <None Include="..\PhoenixSql.Host\target\PhoenixSql.Host-1.0-SNAPSHOT-jar-with-dependencies.jar">
+            <Pack>True</Pack>
+            <Visible>False</Visible>
+            <PackagePath>lib</PackagePath>
+        </None>
+
+        <None Include="PhoenixSql.props">
+            <Pack>True</Pack>
+            <Visible>False</Visible>
+            <PackagePath>build</PackagePath>
+        </None>
     </ItemGroup>
-    
+
     <Import Project="J2NET.props" />
 </Project>

@@ -13,7 +13,7 @@ namespace PhoenixSql.Internal
 {
     internal class PhoenixSqlParserHost
     {
-        private const string jar = "lib/PhoenixSql.Host.jar";
+        private const string hostLibrary = "lib/PhoenixSql.Host.jar";
 
         private Process _hostProcess;
         private Server _handshakeServer;
@@ -42,6 +42,7 @@ namespace PhoenixSql.Internal
         private void Connect()
         {
             VerifyStatus(HostStatus.WatingToConnect);
+            VerifyHostLibrary();
             VerifyJavaRuntime();
 
             _status = HostStatus.WatingToHandshaking;
@@ -96,7 +97,7 @@ namespace PhoenixSql.Internal
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = PathUtility.GetRuntimePath(),
-                    Arguments = $"-jar {jar} {boundPort}"
+                    Arguments = $"-jar {hostLibrary} {boundPort}"
                 },
                 EnableRaisingEvents = true
             };
@@ -186,6 +187,12 @@ namespace PhoenixSql.Internal
                 throw new PhoenixSqlHostException($"Host status must be '{status}', but was '{_status}'.");
         }
 
+        private void VerifyHostLibrary()
+        {
+            if (!File.Exists(hostLibrary))
+                throw new PhoenixSqlHostException($"{hostLibrary} not found.");
+        }
+        
         private void VerifyJavaRuntime()
         {
             var runtimePath = PathUtility.GetRuntimePath();

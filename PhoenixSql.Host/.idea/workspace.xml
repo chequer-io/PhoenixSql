@@ -19,13 +19,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3c52d839-3ac5-4fc1-9221-254dc82c6011" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/../PhoenixSql.Generator/.idea/PhoenixSql.Generator.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../PhoenixSql.Generator/PhoenixSql.Generator.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../PhoenixSql/PhoenixSql.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Directory.Build.props" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/Generator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/Generator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/reflection/Reflections.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/reflection/Reflections.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/service/HostServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/service/HostServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../PhoenixSql.Sample/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../PhoenixSql.Sample/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/Generator.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoComment.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoContainer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoEnum.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoField.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoFieldOneOf.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoFile.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoMember.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoMessage.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoMultiLineComment.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoScalaType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoSingLineComment.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/proto/ProtoWriter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/reflection/MethodInfo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/reflection/Reflections.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/reflection/TypeInfo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/reflection/TypeTree.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/chequer/phoenixsql/generator/reflection/TypeTreeNode.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PhoenixSql/Internal/PhoenixSqlParserHost.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../PhoenixSql/Internal/PhoenixSqlParserHost.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PhoenixSql/PhoenixSql.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/../PhoenixSql/PhoenixSql.csproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../proto/nodes.proto" beforeDir="false" afterPath="$PROJECT_DIR$/../proto/nodes.proto" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -62,7 +82,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../phoenix-master/phoenix-core" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../PhoenixSql.Generator" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
@@ -82,27 +102,7 @@
       <command value="ProtoFieldOneOf" />
     </option>
   </component>
-  <component name="RunManager" selected="Application.Generator">
-    <configuration name="Generator" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.chequer.phoenixsql.generator.Generator" />
-      <module name="PhoenixSql.Host" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.chequer.phoenixsql.generator.reflection.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Generator_old" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.chequer.phoenixsql.generator.Generator_old" />
-      <module name="PhoenixSql.Host" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.chequer.phoenixsql.Main" />
       <module name="PhoenixSql.Host" />
@@ -131,9 +131,7 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.Generator" />
         <item itemvalue="Application.Main" />
-        <item itemvalue="Application.Generator_old" />
       </list>
     </recent_temporary>
   </component>
@@ -151,7 +149,7 @@
       <workItem from="1604465569517" duration="29564000" />
       <workItem from="1604503280972" duration="101000" />
       <workItem from="1604541200797" duration="2938000" />
-      <workItem from="1604551846873" duration="7821000" />
+      <workItem from="1604551846873" duration="12381000" />
     </task>
     <servers />
   </component>
@@ -179,11 +177,11 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="760" y="274" key="#Project_Structure/0.0.2560.1400/-2560.0.2560.1400@0.0.2560.1400" timestamp="1604379272286" />
-    <state x="-1826" y="355" width="1092" height="715" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1604561924228">
+    <state x="-1826" y="355" width="1092" height="715" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1604566568940">
       <screen x="-2560" y="0" width="2560" height="1400" />
     </state>
     <state x="734" y="355" width="1092" height="715" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1604404947917" />
-    <state x="-1826" y="355" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604561924228" />
+    <state x="-1826" y="355" width="1092" height="715" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604566568940" />
     <state x="-1941" y="388" key="#com.intellij.ide.util.MemberChooser" timestamp="1604498640176">
       <screen x="-2560" y="0" width="2560" height="1400" />
     </state>
@@ -213,38 +211,38 @@
     <state width="769" height="347" key="DebuggerActiveHint/0.0.2560.1400/-1920.360.1920.1040@-1920.360.1920.1040" timestamp="1604506550015" />
     <state width="1025" height="466" key="DebuggerActiveHint/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1604424968971" />
     <state width="1025" height="466" key="DebuggerActiveHint/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604501444738" />
-    <state x="-1500" y="455" key="FileChooserDialogImpl" timestamp="1604544102989">
+    <state x="-1500" y="455" key="FileChooserDialogImpl" timestamp="1604566330828">
       <screen x="-2560" y="0" width="2560" height="1400" />
     </state>
     <state x="1060" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1604409018849" />
-    <state x="-1500" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604544102989" />
-    <state width="1760" height="460" key="GridCell.Tab.0.bottom" timestamp="1604562774319">
+    <state x="-1500" y="455" key="FileChooserDialogImpl/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604566330828" />
+    <state width="1234" height="460" key="GridCell.Tab.0.bottom" timestamp="1604566788839">
       <screen x="-2560" y="0" width="2560" height="1400" />
     </state>
     <state width="1877" height="254" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1920.360.1920.1040@-1920.360.1920.1040" timestamp="1604507644466" />
     <state width="2517" height="582" key="GridCell.Tab.0.bottom/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1604427220682" />
-    <state width="1760" height="460" key="GridCell.Tab.0.bottom/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604562774319" />
+    <state width="1234" height="460" key="GridCell.Tab.0.bottom/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604566788839" />
     <state width="2517" height="401" key="GridCell.Tab.0.bottom/0.0.2560.1400/-2560.0.2560.1400@0.0.2560.1400" timestamp="1604380153279" />
-    <state width="1760" height="460" key="GridCell.Tab.0.center" timestamp="1604562774319">
+    <state width="1234" height="460" key="GridCell.Tab.0.center" timestamp="1604566788839">
       <screen x="-2560" y="0" width="2560" height="1400" />
     </state>
     <state width="1877" height="254" key="GridCell.Tab.0.center/0.0.2560.1400/-1920.360.1920.1040@-1920.360.1920.1040" timestamp="1604507644466" />
     <state width="2517" height="582" key="GridCell.Tab.0.center/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1604427220682" />
-    <state width="1760" height="460" key="GridCell.Tab.0.center/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604562774319" />
+    <state width="1234" height="460" key="GridCell.Tab.0.center/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604566788839" />
     <state width="2517" height="401" key="GridCell.Tab.0.center/0.0.2560.1400/-2560.0.2560.1400@0.0.2560.1400" timestamp="1604380153279" />
-    <state width="1760" height="460" key="GridCell.Tab.0.left" timestamp="1604562774319">
+    <state width="1234" height="460" key="GridCell.Tab.0.left" timestamp="1604566788839">
       <screen x="-2560" y="0" width="2560" height="1400" />
     </state>
     <state width="1877" height="254" key="GridCell.Tab.0.left/0.0.2560.1400/-1920.360.1920.1040@-1920.360.1920.1040" timestamp="1604507644466" />
     <state width="2517" height="582" key="GridCell.Tab.0.left/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1604427220682" />
-    <state width="1760" height="460" key="GridCell.Tab.0.left/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604562774319" />
+    <state width="1234" height="460" key="GridCell.Tab.0.left/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604566788839" />
     <state width="2517" height="401" key="GridCell.Tab.0.left/0.0.2560.1400/-2560.0.2560.1400@0.0.2560.1400" timestamp="1604380153279" />
-    <state width="1760" height="460" key="GridCell.Tab.0.right" timestamp="1604562774319">
+    <state width="1234" height="460" key="GridCell.Tab.0.right" timestamp="1604566788839">
       <screen x="-2560" y="0" width="2560" height="1400" />
     </state>
     <state width="1877" height="254" key="GridCell.Tab.0.right/0.0.2560.1400/-1920.360.1920.1040@-1920.360.1920.1040" timestamp="1604507644466" />
     <state width="2517" height="582" key="GridCell.Tab.0.right/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1604427220682" />
-    <state width="1760" height="460" key="GridCell.Tab.0.right/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604562774319" />
+    <state width="1234" height="460" key="GridCell.Tab.0.right/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604566788839" />
     <state width="2517" height="401" key="GridCell.Tab.0.right/0.0.2560.1400/-2560.0.2560.1400@0.0.2560.1400" timestamp="1604380153279" />
     <state width="1572" height="433" key="GridCell.Tab.1.bottom" timestamp="1604562018622">
       <screen x="-2560" y="0" width="2560" height="1400" />
@@ -284,20 +282,24 @@
       <screen x="-2560" y="0" width="2560" height="1400" />
     </state>
     <state x="-1730" y="436" width="899" height="641" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604543888945" />
-    <state x="-740" y="0" width="756" height="1386" key="dock-window-1" timestamp="1604562536207">
+    <state x="-936" y="0" width="952" height="1386" key="dock-window-1" timestamp="1604565754840">
       <screen x="-2560" y="0" width="2560" height="1400" />
     </state>
-    <state x="-740" y="0" width="756" height="1386" key="dock-window-1/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604562536207" />
+    <state x="-936" y="0" width="952" height="1386" key="dock-window-1/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604565754840" />
     <state x="-1230" y="639" key="extract.method.dialog" timestamp="1604507495932">
       <screen x="-1920" y="360" width="1920" height="1040" />
     </state>
     <state x="-1230" y="639" key="extract.method.dialog/0.0.2560.1400/-1920.360.1920.1040@-1920.360.1920.1040" timestamp="1604507495932" />
-    <state x="-1572" y="432" width="1093" height="536" key="find.popup" timestamp="1604561193220">
+    <state x="-1572" y="432" width="1093" height="560" key="find.popup" timestamp="1604566560473">
       <screen x="-2560" y="0" width="2560" height="1400" />
     </state>
     <state x="-1179" y="681" width="820" height="536" key="find.popup/0.0.2560.1400/-1920.360.1920.1040@-1920.360.1920.1040" timestamp="1604506574150" />
     <state x="988" y="432" width="1093" height="536" key="find.popup/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1604425821691" />
-    <state x="-1572" y="432" width="1093" height="536" key="find.popup/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604561193220" />
+    <state x="-1572" y="432" width="1093" height="560" key="find.popup/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604566560473" />
+    <state x="-1770" y="364" key="new project wizard" timestamp="1604566231505">
+      <screen x="-2560" y="0" width="2560" height="1400" />
+    </state>
+    <state x="-1770" y="364" key="new project wizard/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604566231505" />
     <state x="980" y="456" key="refactoring.ChangeSignatureDialog" timestamp="1604408254105">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
@@ -306,12 +308,12 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="936" y="330" key="run.anything.popup/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1604423814407" />
-    <state x="-1617" y="315" width="672" height="678" key="search.everywhere.popup" timestamp="1604561673070">
+    <state x="-1617" y="315" width="672" height="678" key="search.everywhere.popup" timestamp="1604566561973">
       <screen x="-2560" y="0" width="2560" height="1400" />
     </state>
     <state x="-1213" y="594" width="672" height="504" key="search.everywhere.popup/0.0.2560.1400/-1920.360.1920.1040@-1920.360.1920.1040" timestamp="1604506240000" />
     <state x="943" y="315" width="672" height="678" key="search.everywhere.popup/0.0.2560.1400/-1920.360.1920.1040@0.0.2560.1400" timestamp="1604426725326" />
-    <state x="-1617" y="315" width="672" height="678" key="search.everywhere.popup/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604561673070" />
+    <state x="-1617" y="315" width="672" height="678" key="search.everywhere.popup/0.0.2560.1400/-2560.0.2560.1400@-2560.0.2560.1400" timestamp="1604566561973" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
