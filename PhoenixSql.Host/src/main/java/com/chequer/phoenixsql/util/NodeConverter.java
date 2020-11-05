@@ -135,10 +135,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_ArithmeticParseNode.Builder convert(ArithmeticParseNode value) {
+    public static Nodes.P_ArithmeticParseNode.Builder convert(ArithmeticParseNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_ArithmeticParseNode.newBuilder();
+        var builder = Nodes.P_ArithmeticParseNode.newBuilder();
 
         if (value instanceof AddParseNode) {
             builder.setAddParseNode(convert((AddParseNode) value));
@@ -383,10 +383,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_ArrayAllAnyComparisonNode.Builder convert(ArrayAllAnyComparisonNode value) {
+    public static Nodes.P_ArrayAllAnyComparisonNode.Builder convert(ArrayAllAnyComparisonNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_ArrayAllAnyComparisonNode.newBuilder();
+        var builder = Nodes.P_ArrayAllAnyComparisonNode.newBuilder();
 
         if (value instanceof ArrayAnyComparisonNode) {
             builder.setArrayAnyComparisonNode(convert((ArrayAnyComparisonNode) value));
@@ -549,10 +549,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_BinaryParseNode.Builder convert(BinaryParseNode value) {
+    public static Nodes.P_BinaryParseNode.Builder convert(BinaryParseNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_BinaryParseNode.newBuilder();
+        var builder = Nodes.P_BinaryParseNode.newBuilder();
 
         if (value instanceof LikeParseNode) {
             builder.setLikeParseNode(convert((LikeParseNode) value));
@@ -635,10 +635,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_DMLStatement.Builder convert(DMLStatement value) {
+    public static Nodes.P_DMLStatement.Builder convert(DMLStatement value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_DMLStatement.newBuilder();
+        var builder = Nodes.P_DMLStatement.newBuilder();
 
         if (value instanceof UpsertStatement) {
             builder.setUpsertStatement(convert((UpsertStatement) value));
@@ -708,10 +708,10 @@ public class NodeConverter {
         return Nodes.SortOrder.DESC;
     }
 
-    public static Nodes.W_DelegateConstantToCountParseNode.Builder convert(DelegateConstantToCountParseNode value) {
+    public static Nodes.P_DelegateConstantToCountParseNode.Builder convert(DelegateConstantToCountParseNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_DelegateConstantToCountParseNode.newBuilder();
+        var builder = Nodes.P_DelegateConstantToCountParseNode.newBuilder();
 
         if (value instanceof SumAggregateParseNode) {
             builder.setSumAggregateParseNode(convert((SumAggregateParseNode) value));
@@ -976,10 +976,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_FunctionParseNode.Builder convert(FunctionParseNode value) {
+    public static Nodes.P_FunctionParseNode.Builder convert(FunctionParseNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_FunctionParseNode.newBuilder();
+        var builder = Nodes.P_FunctionParseNode.newBuilder();
 
         if (value instanceof SumAggregateParseNode) {
             builder.setSumAggregateParseNode(convert((SumAggregateParseNode) value));
@@ -1087,10 +1087,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_NamedParseNode.Builder convert(NamedParseNode value) {
+    public static Nodes.P_NamedParseNode.Builder convert(NamedParseNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_NamedParseNode.newBuilder();
+        var builder = Nodes.P_NamedParseNode.newBuilder();
 
         if (value instanceof TableWildcardParseNode) {
             builder.setTableWildcardParseNode(convert((TableWildcardParseNode) value));
@@ -1171,10 +1171,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_AlterTableStatement.Builder convert(AlterTableStatement value) {
+    public static Nodes.P_AlterTableStatement.Builder convert(AlterTableStatement value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_AlterTableStatement.newBuilder();
+        var builder = Nodes.P_AlterTableStatement.newBuilder();
 
         if (value instanceof AddColumnStatement) {
             builder.setAddColumnStatement(convert((AddColumnStatement) value));
@@ -1212,10 +1212,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_TableNode.Builder convert(TableNode value) {
+    public static Nodes.P_TableNode.Builder convert(TableNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_TableNode.newBuilder();
+        var builder = Nodes.P_TableNode.newBuilder();
 
         if (value instanceof JoinTableNode) {
             builder.setJoinTableNode(convert((JoinTableNode) value));
@@ -1230,10 +1230,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_CompoundParseNode.Builder convert(CompoundParseNode value) {
+    public static Nodes.P_CompoundParseNode.Builder convert(CompoundParseNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_CompoundParseNode.newBuilder();
+        var builder = Nodes.P_CompoundParseNode.newBuilder();
 
         if (value instanceof SumAggregateParseNode) {
             builder.setSumAggregateParseNode(convert((SumAggregateParseNode) value));
@@ -1541,10 +1541,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_AggregateFunctionParseNode.Builder convert(AggregateFunctionParseNode value) {
+    public static Nodes.P_AggregateFunctionParseNode.Builder convert(AggregateFunctionParseNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_AggregateFunctionParseNode.newBuilder();
+        var builder = Nodes.P_AggregateFunctionParseNode.newBuilder();
 
         if (value instanceof SumAggregateParseNode) {
             builder.setSumAggregateParseNode(convert((SumAggregateParseNode) value));
@@ -1775,10 +1775,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_SingleTableStatement.Builder convert(SingleTableStatement value) {
+    public static Nodes.P_SingleTableStatement.Builder convert(SingleTableStatement value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_SingleTableStatement.newBuilder();
+        var builder = Nodes.P_SingleTableStatement.newBuilder();
 
         if (value instanceof CreateIndexStatement) {
             builder.setCreateIndexStatement(convert((CreateIndexStatement) value));
@@ -1900,10 +1900,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_UnaryParseNode.Builder convert(UnaryParseNode value) {
+    public static Nodes.P_UnaryParseNode.Builder convert(UnaryParseNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_UnaryParseNode.newBuilder();
+        var builder = Nodes.P_UnaryParseNode.newBuilder();
 
         if (value instanceof NotParseNode) {
             builder.setNotParseNode(convert((NotParseNode) value));
@@ -2073,10 +2073,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_ConcreteTableNode.Builder convert(ConcreteTableNode value) {
+    public static Nodes.P_ConcreteTableNode.Builder convert(ConcreteTableNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_ConcreteTableNode.newBuilder();
+        var builder = Nodes.P_ConcreteTableNode.newBuilder();
 
         if (value instanceof BindTableNode) {
             builder.setBindTableNode(convert((BindTableNode) value));
@@ -2119,10 +2119,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_ParseNode.Builder convert(ParseNode value) {
+    public static Nodes.P_ParseNode.Builder convert(ParseNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_ParseNode.newBuilder();
+        var builder = Nodes.P_ParseNode.newBuilder();
 
         if (value instanceof SumAggregateParseNode) {
             builder.setSumAggregateParseNode(convert((SumAggregateParseNode) value));
@@ -2404,10 +2404,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_NamedNode.Builder convert(NamedNode value) {
+    public static Nodes.P_NamedNode.Builder convert(NamedNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_NamedNode.newBuilder();
+        var builder = Nodes.P_NamedNode.newBuilder();
 
         if (value instanceof PrimaryKeyConstraint) {
             builder.setPrimaryKeyConstraint(convert((PrimaryKeyConstraint) value));
@@ -2520,10 +2520,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_MutableStatement.Builder convert(MutableStatement value) {
+    public static Nodes.P_MutableStatement.Builder convert(MutableStatement value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_MutableStatement.newBuilder();
+        var builder = Nodes.P_MutableStatement.newBuilder();
 
         if (value instanceof CreateIndexStatement) {
             builder.setCreateIndexStatement(convert((CreateIndexStatement) value));
@@ -2668,10 +2668,10 @@ public class NodeConverter {
         return Nodes.Operation.ADMIN_1;
     }
 
-    public static Nodes.W_ComparisonParseNode.Builder convert(ComparisonParseNode value) {
+    public static Nodes.P_ComparisonParseNode.Builder convert(ComparisonParseNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_ComparisonParseNode.newBuilder();
+        var builder = Nodes.P_ComparisonParseNode.newBuilder();
 
         if (value instanceof NotEqualParseNode) {
             builder.setNotEqualParseNode(convert((NotEqualParseNode) value));
@@ -2706,10 +2706,10 @@ public class NodeConverter {
         return builder;
     }
 
-    public static Nodes.W_TerminalParseNode.Builder convert(TerminalParseNode value) {
+    public static Nodes.P_TerminalParseNode.Builder convert(TerminalParseNode value) {
         if (value == null) return null;
 
-        var builder = Nodes.W_TerminalParseNode.newBuilder();
+        var builder = Nodes.P_TerminalParseNode.newBuilder();
 
         if (value instanceof WildcardParseNode) {
             builder.setWildcardParseNode(convert((WildcardParseNode) value));

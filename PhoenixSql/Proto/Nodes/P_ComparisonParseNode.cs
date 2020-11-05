@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class W_ComparisonParseNode : IProxyMessage<IComparisonParseNode>, IComparisonParseNode
+    public partial class P_ComparisonParseNode : IProxyMessage<IComparisonParseNode>, IComparisonParseNode
     {
         public string Alias => Message.Alias;
 

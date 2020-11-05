@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class W_AggregateFunctionParseNode : IProxyMessage<IAggregateFunctionParseNode>, IAggregateFunctionParseNode
+    public partial class P_DelegateConstantToCountParseNode : IProxyMessage<IDelegateConstantToCountParseNode>, IDelegateConstantToCountParseNode
     {
         public string Alias => Message.Alias;
 
@@ -12,6 +12,6 @@ namespace PhoenixSql
 
         public bool IsAggregate => Message.IsAggregate;
 
-        public IAggregateFunctionParseNode Message => (IAggregateFunctionParseNode)inherit_;
+        public IDelegateConstantToCountParseNode Message => (IDelegateConstantToCountParseNode)inherit_;
     }
 }

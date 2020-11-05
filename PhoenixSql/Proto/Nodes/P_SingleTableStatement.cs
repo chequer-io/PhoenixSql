@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class W_SingleTableStatement : IProxyMessage<ISingleTableStatement>, ISingleTableStatement
+    public partial class P_SingleTableStatement : IProxyMessage<ISingleTableStatement>, ISingleTableStatement
     {
         public int BindCount => Message.BindCount;
 

@@ -32,5 +32,9 @@
         </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Proto\Nodes" />
+    </ItemGroup>
+
     <Import Project="J2NET.props" />
 </Project>

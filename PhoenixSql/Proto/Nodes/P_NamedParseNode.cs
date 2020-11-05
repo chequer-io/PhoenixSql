@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class W_FunctionParseNode : IProxyMessage<IFunctionParseNode>, IFunctionParseNode
+    public partial class P_NamedParseNode : IProxyMessage<INamedParseNode>, INamedParseNode
     {
         public string Alias => Message.Alias;
 
@@ -10,8 +10,8 @@ namespace PhoenixSql
 
         public string Name => Message.Name;
 
-        public bool IsAggregate => Message.IsAggregate;
+        public bool IsCaseSensitive => Message.IsCaseSensitive;
 
-        public IFunctionParseNode Message => (IFunctionParseNode)inherit_;
+        public INamedParseNode Message => (INamedParseNode)inherit_;
     }
 }

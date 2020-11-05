@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class W_NamedNode : IProxyMessage<INamedNode>, INamedNode
+    public partial class P_NamedNode : IProxyMessage<INamedNode>, INamedNode
     {
         public string Name => Message.Name;
 

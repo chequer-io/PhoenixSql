@@ -182,6 +182,10 @@ public class Main {
     }
 
     private static void writeCSharpInterfaces() throws IOException {
+        if (csharpNodeDir.exists()) {
+            csharpNodeDir.delete();
+        }
+
         csharpNodeDir.mkdir();
 
         for (final var data : generateData.values()) {
@@ -755,7 +759,7 @@ public class Main {
         }
 
         if (node.hasChildren()) {
-            return "W_" + name;
+            return "P_" + name;
         }
 
         return name;

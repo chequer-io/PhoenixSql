@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class W_BinaryParseNode : IProxyMessage<IBinaryParseNode>, IBinaryParseNode
+    public partial class P_ArithmeticParseNode : IProxyMessage<IArithmeticParseNode>, IArithmeticParseNode
     {
         public string Alias => Message.Alias;
 
@@ -8,6 +8,8 @@ namespace PhoenixSql
 
         public bool IsStateless => Message.IsStateless;
 
-        public IBinaryParseNode Message => (IBinaryParseNode)inherit_;
+        public string Operator => Message.Operator;
+
+        public IArithmeticParseNode Message => (IArithmeticParseNode)inherit_;
     }
 }
