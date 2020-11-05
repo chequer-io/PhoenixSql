@@ -4,7 +4,13 @@ import com.chequer.phoenixsql.proto.Common;
 import com.chequer.phoenixsql.proto.Host;
 import com.chequer.phoenixsql.proto.HostServiceGrpc;
 import com.chequer.phoenixsql.proto.Nodes;
+import com.chequer.phoenixsql.util.NodeConverter;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import org.apache.phoenix.exception.PhoenixParserException;
+import org.apache.phoenix.parse.PhoenixSQLParser;
+import org.apache.phoenix.parse.SQLParser;
 
 public class HostServiceImpl extends HostServiceGrpc.HostServiceImplBase {
     @Override
@@ -15,27 +21,21 @@ public class HostServiceImpl extends HostServiceGrpc.HostServiceImplBase {
 
     @Override
     public void parse(Host.ParseRequest request, StreamObserver<Nodes.I_BindableStatement> responseObserver) {
-        var name = Nodes.TableName.newBuilder()
-                .setSchemaName("schema")
-                .setTableName("table")
-                .setIsSchemaNameCaseSensitive(true);
+        try {
+            var parser = new SQLParser(request.getSql());
+            var statement = parser.parseStatement();
+            var rpcStatement = NodeConverter.convert(statement).build();
 
-        var namedNode = Nodes.NamedTableNode.newBuilder()
-                .setAlias("alias")
-                .setName(name)
-                .setTableSamplingRate(1.685);
-
-        var tableNode = Nodes.W_TableNode.newBuilder()
-                .setNamedTableNode(namedNode);
-
-        var selectStatement = Nodes.SelectStatement.newBuilder()
-                .setFrom(tableNode);
-
-        var bindableStatement = Nodes.I_BindableStatement.newBuilder()
-                .setSelectStatement(selectStatement)
-                .build();
-
-        responseObserver.onNext(bindableStatement);
-        responseObserver.onCompleted();
+            responseObserver.onNext(rpcStatement);
+            responseObserver.onCompleted();
+        } catch (PhoenixParserException e) {
+            responseObserver.onError(Status.ABORTED
+                    .withDescription(e.getMessage())
+                    .asRuntimeException());
+        } catch (Throwable t) {
+            responseObserver.onError(Status.UNKNOWN
+                    .withDescription(t.getMessage())
+                    .asRuntimeException());
+        }
     }
 }

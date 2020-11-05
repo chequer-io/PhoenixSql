@@ -8,16 +8,41 @@ namespace PhoenixSql.Sample
     {
         private static void Main(string[] args)
         {
+            var defaultColor = Console.ForegroundColor;
+
             while (true)
             {
-                var sw = Stopwatch.StartNew();
+                try
+                {
+                    Console.ForegroundColor = defaultColor;
+                    Console.Write("SQL: ");
 
-                var s = PhoenixSqlParser.Parse("select 1");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    var sql = Console.ReadLine();
 
-                sw.Stop();
-                Console.WriteLine($"parsed in {sw.Elapsed.TotalMilliseconds:0.00} ms");
-                Thread.Sleep(500);
+                    var sw = Stopwatch.StartNew();
+                    var statement = PhoenixSqlParser.Parse(sql);
+                    sw.Stop();
+
+                    Print(statement);
+
+                    Console.WriteLine($"parsed in {sw.Elapsed.TotalMilliseconds:0.00} ms");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+
+                Console.WriteLine();
             }
+        }
+
+        private static void Print(IBindableStatement statement, int depth = 0)
+        {
+            if (depth > 0)
+                Console.Write(new string(' ', depth * 4));
+
+            Console.WriteLine(statement.GetType().Name);
         }
     }
 }

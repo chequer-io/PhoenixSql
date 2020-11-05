@@ -354,8 +354,6 @@ public class Main {
                     int variable = -1;
 
                     for (final var inheritData : map) {
-                        // body.append(indent2).append("// ").append(inheritData.getProtoType().getName()).append(";\n");
-
                         for (final var inheritProperty : inheritData.javaProperties) {
                             index++;
                             var protoField = fields.get(index);
@@ -364,6 +362,7 @@ public class Main {
 
                             if (protoField.isRepeated()) {
                                 TypeInfo elementType;
+                                var converterName = "convert";
 
                                 if (returnType.isArray()) {
                                     elementType = returnType.getElementType();
@@ -378,10 +377,27 @@ public class Main {
                                     var t1 = elementType.getGenericTypeArguments().get(0);
                                     var t2 = elementType.getGenericTypeArguments().get(1);
 
+                                    var needConvert1 = convertTypes.contains(t1.unwrap()) || generateData.containsKey(t1);
+                                    var needConvert2 = convertTypes.contains(t2.unwrap()) || generateData.containsKey(t2);
+
                                     var paramTypeName = String.format("Pair<%s, %s>", getJavaSimpleTypeName(t1.unwrap()), getJavaSimpleTypeName(t2.unwrap()));
                                     var pairTypeName = String.format("%s.Pair_%s_%s", message.getName(), t1.getName(), t2.getName());
+                                    converterName = String.format("convertPair%s%s", t1.getName(), t2.getName());
+
+                                    if (needConvert1) {
+                                        pairConvertBody.append(indent2).append("builder.setFirst(convert(value.getFirst()));\n");
+                                    } else {
+                                        pairConvertBody.append(indent2).append("builder.setFirst(value.getFirst());\n");
+                                    }
+
+                                    if (needConvert2) {
+                                        pairConvertBody.append(indent2).append("builder.setSecond(convert(value.getSecond()));\n");
+                                    } else {
+                                        pairConvertBody.append(indent2).append("builder.setSecond(value.getSecond());");
+                                    }
 
                                     fragments.add(convertMessageTemplate
+                                            .replace(":Name:", converterName)
                                             .replace(":ProtoType:", pairTypeName)
                                             .replace(":Type:", paramTypeName)
                                             .replace(":Body:", pairConvertBody.toString()));
@@ -390,32 +406,38 @@ public class Main {
                                 var needConvert = convertTypes.contains(elementType.unwrap()) || generateData.containsKey(elementType);
 
                                 if (needConvert) {
-                                    body.append(indent2).append(String.format("addAll(value.%s(), NodeConverter::convert, builder::add%s);\n", inheritProperty.getName(), protoMethodName));
+                                    body.append(indent2).append(String.format("addAll(value.%s(), NodeConverter::%s, builder::add%s);", inheritProperty.getName(), converterName, protoMethodName));
                                 } else if (inheritProperty.getName().equals("getUdfParseNodes")) {
-                                    body.append(indent2).append("addAll(value.getUdfParseNodes(), builder::addUdfParseNodes);\n");
+                                    body.append(indent2).append("addAll(value.getUdfParseNodes(), builder::addUdfParseNodes);");
                                 } else {
-                                    body.append(indent2).append("//  -- REPEATED : ").append(inheritProperty.getName()).append("\n");
+                                    body.append(indent2).append("//  -- REPEATED : ").append(inheritProperty.getName());
                                 }
                             } else if (convertTypes.contains(returnType.unwrap()) || generateData.containsKey(returnType)) {
                                 var variableName = "v" + ++variable;
 
                                 body.append(indent2).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
-                                body.append(indent2).append(String.format("if (%s != null) builder.set%s(convert(%s));\n", variableName, protoMethodName, variableName));
-                            } else if (returnType.unwrap() == String.class) {
+                                body.append(indent2).append(String.format("if (%s != null) builder.set%s(convert(%s));", variableName, protoMethodName, variableName));
+                            } else if (!returnType.unwrap().isPrimitive()) {
                                 var variableName = "v" + ++variable;
 
                                 body.append(indent2).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
-                                body.append(indent2).append(String.format("if (%s != null) builder.set%s(%s);\n", variableName, protoMethodName, variableName));
+                                body.append(indent2).append(String.format("if (%s != null) builder.set%s(%s);", variableName, protoMethodName, variableName));
                             } else {
-                                body.append(indent2).append(String.format("builder.set%s(value.%s());\n", protoMethodName, inheritProperty.getName()));
+                                body.append(indent2).append(String.format("builder.set%s(value.%s());", protoMethodName, inheritProperty.getName()));
+                            }
+
+                            if (index < fields.size() - 1) {
+                                body.append('\n');
                             }
                         }
                     }
+
                 } else {
                     throw new Exception();
                 }
 
                 fragments.add(convertMessageTemplate
+                        .replace(":Name:", "convert")
                         .replace(":ProtoType:", message.getName())
                         .replace(":Type:", typeName)
                         .replace(":Body:", body.toString()));

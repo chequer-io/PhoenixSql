@@ -23,12 +23,19 @@ namespace PhoenixSql
         }
     }
 
+    public sealed class PhoenixSqlSyntaxException : PhoenixSqlException
+    {
+        internal PhoenixSqlSyntaxException(string message) : base(message)
+        {
+        }
+    }
+
     public sealed class PhoenixSqlHostException : PhoenixSqlException
     {
         internal PhoenixSqlHostException(string message) : base(message)
         {
         }
-        
+
         internal PhoenixSqlHostException(string message, Exception exception) : base(message, exception)
         {
         }

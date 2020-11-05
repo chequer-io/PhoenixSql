@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
@@ -13,7 +14,7 @@ namespace PhoenixSql.Internal
 {
     internal class PhoenixSqlParserHost
     {
-        private const string hostLibrary = "lib/PhoenixSql.Host.jar";
+        private const string hostLibrary = "lib/PhoenixSql.Host-1.0-SNAPSHOT-jar-with-dependencies.jar";
 
         private Process _hostProcess;
         private Server _handshakeServer;
@@ -192,7 +193,7 @@ namespace PhoenixSql.Internal
             if (!File.Exists(hostLibrary))
                 throw new PhoenixSqlHostException($"{hostLibrary} not found.");
         }
-        
+
         private void VerifyJavaRuntime()
         {
             var runtimePath = PathUtility.GetRuntimePath();
@@ -203,16 +204,38 @@ namespace PhoenixSql.Internal
 
         public IBindableStatement Parse(string sql)
         {
-            _event.WaitOne();
-            VerifyStatus(HostStatus.Connected);
-            return _hostService.parse(new ParseRequest { Sql = sql }).Value;
+            try
+            {
+                _event.WaitOne();
+                VerifyStatus(HostStatus.Connected);
+                return _hostService.parse(new ParseRequest { Sql = sql }).Value;
+            }
+            catch (RpcException e)
+            {
+                throw HandleParseError(e);
+            }
         }
 
         public async Task<IBindableStatement> ParseAsync(string sql)
         {
-            _event.WaitOne();
-            VerifyStatus(HostStatus.Connected);
-            return (await _hostService.parseAsync(new ParseRequest { Sql = sql })).Value;
+            try
+            {
+                _event.WaitOne();
+                VerifyStatus(HostStatus.Connected);
+                return (await _hostService.parseAsync(new ParseRequest { Sql = sql })).Value;
+            }
+            catch (RpcException e)
+            {
+                throw HandleParseError(e);
+            }
+        }
+
+        private static PhoenixSqlException HandleParseError(RpcException e)
+        {
+            if (e.Status.StatusCode == StatusCode.Aborted)
+                return new PhoenixSqlSyntaxException(e.Status.Detail);
+
+            return new PhoenixSqlHostException(e.Status.Detail);
         }
 
         #region Static

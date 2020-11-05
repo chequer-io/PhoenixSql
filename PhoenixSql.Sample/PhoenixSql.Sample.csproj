@@ -7,6 +7,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\PhoenixSql\PhoenixSql.csproj"/>
+
+        <None Include="..\PhoenixSql.Host\target\PhoenixSql.Host-1.0-SNAPSHOT-jar-with-dependencies.jar" Link="lib\PhoenixSql.Host-1.0-SNAPSHOT-jar-with-dependencies.jar">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <PropertyGroup>

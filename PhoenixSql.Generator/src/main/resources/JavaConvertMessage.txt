@@ -1,4 +1,4 @@
-    public static Nodes.:ProtoType:.Builder convert(:Type: value) {
+    public static Nodes.:ProtoType:.Builder :Name:(:Type: value) {
         if (value == null) return null;
 
         var builder = Nodes.:ProtoType:.newBuilder();
