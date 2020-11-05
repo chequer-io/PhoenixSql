@@ -6,12 +6,19 @@ import com.google.common.reflect.ClassPath;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("UnstableApiUsage")
 public class Reflections {
-    public static ImmutableSet<ClassPath.ClassInfo> getTopLevelClasses(String packageName) throws IOException {
+    public static List<ClassPath.ClassInfo> getTopLevelClasses(String packageName) throws IOException {
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        return ClassPath.from(loader).getTopLevelClasses(packageName);
+
+        return ClassPath.from(loader).getTopLevelClasses(packageName).stream()
+                .sorted(Comparator.comparing(ClassPath.ClassInfo::getName))
+                .collect(Collectors.toList());
     }
 
     public static boolean isAbstract(Class<?> clazz) {

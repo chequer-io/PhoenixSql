@@ -112,9 +112,9 @@
                 <configuration>
                     <source>14</source>
                     <target>14</target>
-                    <excludes>
-                        <exclude>com/chequer/phoenixsql/generator/**/*.java</exclude>
-                    </excludes>
+<!--                    <excludes>-->
+<!--                        <exclude>com/chequer/phoenixsql/generator/**/*.java</exclude>-->
+<!--                    </excludes>-->
                 </configuration>
             </plugin>
         </plugins>

@@ -212,11 +212,20 @@ public class Generator {
 
                 for (int i = 0; i < data.csProperties.size(); i++) {
                     if (i > 0) {
-                        csWriter.write("\n");
+                        csWriter.write('\n');
                     }
 
                     var property = data.csProperties.get(i);
                     csWriter.write(String.format("        %s %s { get; }\n", property.type, property.name));
+                }
+
+                if (data.csTypeName.equals("IBinaryParseNode")) {
+                    if (data.csProperties.size() > 0) {
+                        csWriter.write('\n');
+                    }
+
+                    csWriter.write("        public IParseNode LHS => Children[0];\n\n");
+                    csWriter.write("        public IParseNode RHS => Children[1];\n");
                 }
 
                 csWriter.write("    }\n");
@@ -241,11 +250,6 @@ public class Generator {
                                     baseProperty.name));
                         }
                     }
-                }
-
-                if (data.csTypeName == "IBinaryParseNode") {
-                    csWriter.write("        public IParseNode LHS => Children[0];\n\n");
-                    csWriter.write("        public IParseNode LHS => Children[1];\n");
                 }
 
                 csWriter.write("    }\n");
@@ -348,7 +352,7 @@ public class Generator {
                 for (final var inheritData : inheritMap) {
                     var protoField = new ProtoField();
                     protoField.setType(new ProtoType(data.message.getName(), null));
-                    protoField.setName("i" + (inheritData.inheritField.fields().size() + 1));
+                    protoField.setName(data.message.getName());
 
                     inheritData.inheritField.fields().add(protoField);
                 }
@@ -531,6 +535,10 @@ public class Generator {
         }
 
         return properties;
+    }
+
+    private static String convertToCamelCase(String value) {
+        return Character.toLowerCase(value.charAt(0)) + value.substring(1);
     }
 
     private static class GenerateData {

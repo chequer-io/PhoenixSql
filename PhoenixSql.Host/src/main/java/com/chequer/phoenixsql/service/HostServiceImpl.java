@@ -5,7 +5,6 @@ import com.chequer.phoenixsql.proto.Host;
 import com.chequer.phoenixsql.proto.HostServiceGrpc;
 import com.chequer.phoenixsql.proto.Nodes;
 import io.grpc.stub.StreamObserver;
-import org.apache.phoenix.parse.BinaryParseNode;
 
 public class HostServiceImpl extends HostServiceGrpc.HostServiceImplBase {
     @Override
@@ -27,21 +26,13 @@ public class HostServiceImpl extends HostServiceGrpc.HostServiceImplBase {
                 .setTableSamplingRate(1.685);
 
         var tableNode = Nodes.W_TableNode.newBuilder()
-                .setI1(namedNode);
-
-        var multiplyParseNode = Nodes.MultiplyParseNode.newBuilder()
-                .setAlias("MultiplyParseNode");
-
-        var parseNode = Nodes.W_ParseNode.newBuilder()
-                .setI1(multiplyParseNode);
+                .setNamedTableNode(namedNode);
 
         var selectStatement = Nodes.SelectStatement.newBuilder()
-                .setFrom(tableNode)
-                .setWhere(parseNode)
-                .setHaving(parseNode);
+                .setFrom(tableNode);
 
         var bindableStatement = Nodes.I_BindableStatement.newBuilder()
-                .setI27(selectStatement)
+                .setSelectStatement(selectStatement)
                 .build();
 
         responseObserver.onNext(bindableStatement);

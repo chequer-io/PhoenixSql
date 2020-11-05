@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 
 namespace PhoenixSql.Sample
 {
@@ -15,7 +16,7 @@ namespace PhoenixSql.Sample
 
                 sw.Stop();
                 Console.WriteLine($"parsed in {sw.Elapsed.TotalMilliseconds:0.00} ms");
-                break;
+                Thread.Sleep(500);
             }
         }
     }

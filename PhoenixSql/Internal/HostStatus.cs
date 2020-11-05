@@ -6,7 +6,6 @@
         WatingToHandshaking,
         Handshaking,
         Connecting,
-        Connected,
-        Closed
+        Connected
     }
 }

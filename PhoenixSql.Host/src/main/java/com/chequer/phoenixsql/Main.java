@@ -16,9 +16,7 @@ public class Main {
 
             handshake(handshakePort, hostServer.getPort());
 
-            System.out.println("--------------- 1");
             hostServer.waitForExit();
-            System.out.println("--------------- 2");
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }

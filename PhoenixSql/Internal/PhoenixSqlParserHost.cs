@@ -33,6 +33,12 @@ namespace PhoenixSql.Internal
             Connect();
         }
 
+        private void Reconnect()
+        {
+            Shutdown();
+            Connect();
+        }
+
         private void Connect()
         {
             VerifyStatus(HostStatus.WatingToConnect);
@@ -78,10 +84,7 @@ namespace PhoenixSql.Internal
 
         private void HandshakeTimeout()
         {
-            if (_status == HostStatus.Handshaking || _status == HostStatus.Connecting)
-            {
-                throw new PhoenixSqlHostException("Host handshake timeout.");
-            }
+            Reconnect();
         }
 
         private void SpawnHostProcess(in int boundPort)
@@ -100,20 +103,11 @@ namespace PhoenixSql.Internal
 
             _hostProcess.Exited += HostProcessOnExited;
             _hostProcess.Start();
-            Console.WriteLine(_hostProcess.Id);
         }
 
         private void HostProcessOnExited(object sender, EventArgs e)
         {
-            bool reconnect = _status == HostStatus.Connected;
-
-            Shutdown();
-
-            if (reconnect)
-            {
-                _status = HostStatus.WatingToHandshaking;
-                Connect();
-            }
+            Reconnect();
         }
 
         private async Task<AckResponse> HostProcessOnAck(AckRequest request)
@@ -183,7 +177,7 @@ namespace PhoenixSql.Internal
             }
 
             _hostService = null;
-            _status = HostStatus.Closed;
+            _status = HostStatus.WatingToConnect;
         }
 
         private void VerifyStatus(HostStatus status)
