@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package proto;
+
+option csharp_namespace = "PhoenixSql.Internal";
+option java_package = "com.chequer.phoenixsql.proto";
+
+message Empty {
+}

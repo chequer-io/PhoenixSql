@@ -243,6 +243,11 @@ public class Generator {
                     }
                 }
 
+                if (data.csTypeName == "IBinaryParseNode") {
+                    csWriter.write("        public IParseNode LHS => Children[0];\n\n");
+                    csWriter.write("        public IParseNode LHS => Children[1];\n");
+                }
+
                 csWriter.write("    }\n");
             }
 

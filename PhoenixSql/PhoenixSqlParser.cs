@@ -1,38 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using J2NET;
-using J2NET.Exceptions;
-using J2NET.Utilities;
+﻿using System.Threading.Tasks;
+using PhoenixSql.Internal;
 
 namespace PhoenixSql
 {
     public sealed class PhoenixSqlParser
     {
-        public static void Test()
+        public static IBindableStatement Parse(string sql)
         {
-            var jar = @"C:\Users\devel\Desktop\Work\PhoenixSql\PhoenixSql.Host\target\PhoenixSql.Host-1.0-SNAPSHOT-jar-with-dependencies.jar";
-            var runtimePath = PathUtility.GetRuntimePath();
-
-            if (!Directory.Exists(Path.GetDirectoryName(runtimePath)))
-                throw new RuntimeNotFoundException();
-
-            var p = Process.Start(new ProcessStartInfo
-            {
-                FileName = runtimePath,
-                Arguments = $"-jar {jar}",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true
-            });
-
-            var d = p.StandardOutput.ReadToEnd();
+            return PhoenixSqlParserHost.Instance.Parse(sql);
         }
 
-        public static IEnumerable<IBindableStatement> Parse(string sql)
+        public static Task<IBindableStatement> ParseAsync(string sql)
         {
-            throw new NotImplementedException();
+            return PhoenixSqlParserHost.Instance.ParseAsync(sql);
         }
     }
 }

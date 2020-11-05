@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package proto;
+
+option csharp_namespace = "PhoenixSql.Internal";
+option java_package = "com.chequer.phoenixsql.proto";
+
+service HandshakeService {
+    rpc ack (AckRequest) returns (AckResponse);
+}
+
+message AckRequest {
+    int32 port = 1;
+}
+
+message AckResponse {
+}

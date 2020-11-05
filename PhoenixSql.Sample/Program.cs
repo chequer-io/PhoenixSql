@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+using System.Diagnostics;
 
 namespace PhoenixSql.Sample
 {
@@ -8,7 +7,16 @@ namespace PhoenixSql.Sample
     {
         private static void Main(string[] args)
         {
-            Console.WriteLine(typeof(List<int>).BaseType);
+            while (true)
+            {
+                var sw = Stopwatch.StartNew();
+
+                var s = PhoenixSqlParser.Parse("select 1");
+
+                sw.Stop();
+                Console.WriteLine($"parsed in {sw.Elapsed.TotalMilliseconds:0.00} ms");
+                break;
+            }
         }
     }
 }

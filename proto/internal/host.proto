@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package proto;
+
+option csharp_namespace = "PhoenixSql.Internal";
+option java_package = "com.chequer.phoenixsql.proto";
+
+import "nodes.proto";
+import "common.proto";
+
+service HostService {
+    rpc ping (Empty) returns (Empty);
+    rpc parse (ParseRequest) returns (I_BindableStatement);
+}
+
+message ParseRequest {
+    string sql = 1;
+}
