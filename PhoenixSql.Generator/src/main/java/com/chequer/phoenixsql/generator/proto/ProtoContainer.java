@@ -3,6 +3,7 @@ package com.chequer.phoenixsql.generator.proto;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 public abstract class ProtoContainer extends ProtoMember implements Iterable<ProtoMember> {
     private final List<ProtoMember> members;
@@ -42,5 +43,9 @@ public abstract class ProtoContainer extends ProtoMember implements Iterable<Pro
     @Override
     public Iterator<ProtoMember> iterator() {
         return members.iterator();
+    }
+
+    public Stream<ProtoMember> stream() {
+        return members.stream();
     }
 }

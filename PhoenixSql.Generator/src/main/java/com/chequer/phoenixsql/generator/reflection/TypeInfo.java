@@ -77,7 +77,7 @@ public class TypeInfo {
             if (interfaces.length == 1) {
                 baseType = TypeInfo.get(interfaces[0]);
             } else if (interfaces.length > 1) {
-                System.out.println(clazz);
+//                System.out.println(clazz);
             }
         }
 
@@ -94,6 +94,10 @@ public class TypeInfo {
 
     public String getName() {
         return clazz.getSimpleName();
+    }
+
+    public String getParameterizedName() {
+        return parameterizedType.getTypeName();
     }
 
     public String getPackageName() {

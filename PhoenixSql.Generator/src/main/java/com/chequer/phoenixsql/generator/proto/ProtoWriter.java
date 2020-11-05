@@ -234,6 +234,7 @@ public class ProtoWriter {
         depth++;
 
         var values = protoEnum.values();
+        protoEnum.lastGeneratedValues.clear();
 
         for (int i = 0; i < values.size(); i++) {
             var value = values.get(i);
@@ -243,6 +244,7 @@ public class ProtoWriter {
                 value = value + "_" + enumCount;
             }
 
+            protoEnum.lastGeneratedValues.add(value);
             enumMap.put(value, ++enumCount);
 
             appendIndent();

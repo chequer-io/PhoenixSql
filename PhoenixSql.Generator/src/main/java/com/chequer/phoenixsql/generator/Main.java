@@ -2,9 +2,12 @@ package com.chequer.phoenixsql.generator;
 
 import com.chequer.phoenixsql.generator.proto.*;
 import com.chequer.phoenixsql.generator.reflection.*;
+import com.chequer.phoenixsql.generator.util.ResourceUtil;
 import org.apache.phoenix.expression.LiteralExpression;
 import org.apache.phoenix.parse.*;
+import org.apache.phoenix.schema.PName;
 import org.apache.phoenix.schema.PTableKey;
+import org.apache.phoenix.schema.types.PDataType;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -19,7 +22,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("UnstableApiUsage")
 
 public class Main {
-    private static String javaProjectDir;
+    private static File rootDir;
     private static File csharpNodeDir;
     private static File protoFile;
 
@@ -76,7 +79,7 @@ public class Main {
         put(TypeInfo.get(boolean.class), new ProtoType(ProtoScalaType.BOOL));
         put(TypeInfo.get(Boolean.class), new ProtoType(ProtoScalaType.BOOL));
         put(TypeInfo.get(String.class), new ProtoType(ProtoScalaType.STRING));
-        put(TypeInfo.get(Object.class), new ProtoType("google.protobuf.Any", "google/protobuf/any.proto"));
+        put(TypeInfo.get(Object.class), new ProtoType(ProtoScalaType.STRING));
     }};
 
     private static final Map<String, String> csScalarTypes = new HashMap<>() {{
@@ -91,9 +94,9 @@ public class Main {
     private static final Map<TypeInfo, GenerateData> generateData = new HashMap<>();
 
     public static void main(String[] args) throws Exception {
-        javaProjectDir = System.getProperty("user.dir");
-        csharpNodeDir = new File(javaProjectDir, "../PhoenixSql/Proto/Nodes");
-        protoFile = new File(javaProjectDir, "../proto/nodes.proto");
+        rootDir = new File(System.getProperty("user.dir"), "../");
+        csharpNodeDir = new File(rootDir, "PhoenixSql/Proto/Nodes");
+        protoFile = new File(rootDir, "proto/nodes.proto");
 
         proto = new ProtoFile();
         proto.setSyntax("proto3");
@@ -116,6 +119,7 @@ public class Main {
         protoWriter.write(proto);
         writer.close();
 
+        writeJava();
         writeCSharpInterfaces();
     }
 
@@ -167,8 +171,6 @@ public class Main {
     }
 
     private static void writeCSharpInterfaces() throws IOException {
-        System.out.println("---------");
-
         csharpNodeDir.mkdir();
 
         for (final var data : generateData.values()) {
@@ -180,16 +182,9 @@ public class Main {
             var csWriter = new FileWriter(csFile);
 
             var typeNode = typeTree.get(data.type);
-            var inheritMap = new ArrayList<GenerateData>();
+            var inheritMap = getInheritMap(typeNode, false);
 
-            if (typeNode != null) {
-                var parentNode = typeNode.getParent();
-
-                while (parentNode != null) {
-                    inheritMap.add(0, generateData.get(parentNode.typeInfo));
-                    parentNode = parentNode.getParent();
-                }
-
+            if (inheritMap != null) {
                 for (final var inherit : inheritMap) {
                     for (final var inheritField : inherit.inheritMembers) {
                         data.message.add(inheritField);
@@ -197,13 +192,15 @@ public class Main {
                 }
             }
 
+            var extended = inheritMap != null && !inheritMap.isEmpty();
+
             csWriter.write("namespace PhoenixSql\n");
             csWriter.write("{\n");
 
-            if (data.csInterface) {
+            if (data.isInterface) {
                 csWriter.write(String.format("    public interface %s", data.csTypeName));
 
-                if (!inheritMap.isEmpty()) {
+                if (extended) {
                     csWriter.write(" : ");
                     csWriter.write(inheritMap.get(inheritMap.size() - 1).csTypeName);
                 }
@@ -233,7 +230,7 @@ public class Main {
             } else {
                 csWriter.write(String.format("    public partial class %s", data.csTypeName));
 
-                if (!inheritMap.isEmpty()) {
+                if (extended) {
                     csWriter.write(" : ");
                     csWriter.write(inheritMap.get(inheritMap.size() - 1).csTypeName);
                 }
@@ -241,14 +238,16 @@ public class Main {
                 csWriter.write('\n');
                 csWriter.write("    {\n");
 
-                for (final var baseData : inheritMap) {
-                    for (final var baseProperty : baseData.csProperties) {
-                        if (baseProperty.type.contains("IParseNode")) {
-                            csWriter.write(String.format("        %s %s.%s => %s;\n",
-                                    baseProperty.type,
-                                    baseData.csTypeName,
-                                    baseProperty.name,
-                                    baseProperty.name));
+                if (extended) {
+                    for (final var baseData : inheritMap) {
+                        for (final var baseProperty : baseData.csProperties) {
+                            if (baseProperty.type.contains("IParseNode")) {
+                                csWriter.write(String.format("        %s %s.%s => %s;\n",
+                                        baseProperty.type,
+                                        baseData.csTypeName,
+                                        baseProperty.name,
+                                        baseProperty.name));
+                            }
                         }
                     }
                 }
@@ -262,6 +261,187 @@ public class Main {
         }
     }
 
+    private static void writeJava() throws Exception {
+        final var convertTypes = new HashSet<Class<?>>() {{
+            add(PDataType.class);
+            add(PName.class);
+            add(LiteralExpression.class);
+            add(Object.class);
+            add(org.apache.hadoop.hbase.util.Pair.class);
+        }};
+
+        final var indent2 = "        ";
+        final var indent3 = "            ";
+
+        final var convertEnumTemplate = ResourceUtil.readString("JavaConvertEnum.txt");
+        final var convertMessageTemplate = ResourceUtil.readString("JavaConvertMessage.txt");
+        final var converterTemplate = ResourceUtil.readString("JavaNodeConverter.txt");
+
+        assert convertEnumTemplate != null;
+        assert convertMessageTemplate != null;
+        assert converterTemplate != null;
+
+        final var converterBody = new StringBuilder();
+
+        for (final var data : generateData.values()) {
+            var typeNode = typeTree.get(data.type);
+            var typeName = getJavaSimpleTypeName(data.type.unwrap());
+
+            var fragments = new ArrayList<String>();
+
+            if (data.type.isEnum()) {
+                var message = data.enumMessage;
+
+                var body = new StringBuilder();
+                var values = message.lastGeneratedValues;
+
+                for (int i = 0; i < values.size() - 1; i++) {
+                    var value = values.get(i);
+
+                    body.append(indent2);
+
+                    if (i == 0) {
+                        body.append("if ");
+                    } else {
+                        body.append("} else if ");
+                    }
+
+                    body.append(String.format("(value == %s.%s) {\n", typeName, value));
+                    body.append(indent3).append(String.format("return Nodes.%s.%s;\n", message.getName(), value));
+                }
+
+                body.append(indent2).append("}\n\n");
+                body.append(indent2).append(String.format("return Nodes.%s.%s;", message.getName(), values.get(values.size() - 1)));
+
+                fragments.add(convertEnumTemplate
+                        .replace(":ProtoType:", message.getName())
+                        .replace(":Type:", typeName)
+                        .replace(":Body:", body.toString()));
+            } else {
+                var message = data.message;
+
+                var body = new StringBuilder();
+
+                if (data.isInterface) {
+                    var fields = data.inheritField.fields();
+
+                    for (int i = 0; i < fields.size(); i++) {
+                        var field = fields.get(i);
+
+                        body.append(indent2);
+
+                        if (i == 0) {
+                            body.append("if ");
+                        } else {
+                            body.append("} else if ");
+                        }
+
+                        body.append(String.format("(value instanceof %s) {\n", field.getName()));
+                        body.append(indent3).append(String.format("builder.set%s(convert((%s) value));\n", field.getName(), field.getName()));
+                    }
+
+                    if (fields.size() > 0) {
+                        body.append(indent2).append("}");
+                    }
+                } else if (typeNode != null) {
+                    var fields = message.stream()
+                            .filter(m -> m instanceof ProtoField)
+                            .map(m -> (ProtoField) m)
+                            .collect(Collectors.toList());
+
+                    var map = getInheritMap(typeNode, true);
+                    int index = -1;
+                    int variable = -1;
+
+                    for (final var inheritData : map) {
+                        // body.append(indent2).append("// ").append(inheritData.getProtoType().getName()).append(";\n");
+
+                        for (final var inheritProperty : inheritData.javaProperties) {
+                            index++;
+                            var protoField = fields.get(index);
+                            var returnType = inheritProperty.getReturnType();
+                            var protoMethodName = toPascalCase(protoField.getName());
+
+                            if (protoField.isRepeated()) {
+                                TypeInfo elementType;
+
+                                if (returnType.isArray()) {
+                                    elementType = returnType.getElementType();
+                                } else {
+                                    var genericReturnType = TypeInfo.get((ParameterizedType) inheritProperty.getGenericReturnType());
+                                    elementType = genericReturnType.getGenericTypeArguments().get(0);
+                                }
+
+                                if (hbasePairType.isAssignableFrom(elementType)) {
+                                    var pairConvertBody = new StringBuilder();
+
+                                    var t1 = elementType.getGenericTypeArguments().get(0);
+                                    var t2 = elementType.getGenericTypeArguments().get(1);
+
+                                    var paramTypeName = String.format("Pair<%s, %s>", getJavaSimpleTypeName(t1.unwrap()), getJavaSimpleTypeName(t2.unwrap()));
+                                    var pairTypeName = String.format("%s.Pair_%s_%s", message.getName(), t1.getName(), t2.getName());
+
+                                    fragments.add(convertMessageTemplate
+                                            .replace(":ProtoType:", pairTypeName)
+                                            .replace(":Type:", paramTypeName)
+                                            .replace(":Body:", pairConvertBody.toString()));
+                                }
+
+                                var needConvert = convertTypes.contains(elementType.unwrap()) || generateData.containsKey(elementType);
+
+                                if (needConvert) {
+                                    body.append(indent2).append(String.format("addAll(value.%s(), NodeConverter::convert, builder::add%s);\n", inheritProperty.getName(), protoMethodName));
+                                } else if (inheritProperty.getName().equals("getUdfParseNodes")) {
+                                    body.append(indent2).append("addAll(value.getUdfParseNodes(), builder::addUdfParseNodes);\n");
+                                } else {
+                                    body.append(indent2).append("//  -- REPEATED : ").append(inheritProperty.getName()).append("\n");
+                                }
+                            } else if (convertTypes.contains(returnType.unwrap()) || generateData.containsKey(returnType)) {
+                                var variableName = "v" + ++variable;
+
+                                body.append(indent2).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
+                                body.append(indent2).append(String.format("if (%s != null) builder.set%s(convert(%s));\n", variableName, protoMethodName, variableName));
+                            } else if (returnType.unwrap() == String.class) {
+                                var variableName = "v" + ++variable;
+
+                                body.append(indent2).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
+                                body.append(indent2).append(String.format("if (%s != null) builder.set%s(%s);\n", variableName, protoMethodName, variableName));
+                            } else {
+                                body.append(indent2).append(String.format("builder.set%s(value.%s());\n", protoMethodName, inheritProperty.getName()));
+                            }
+                        }
+                    }
+                } else {
+                    throw new Exception();
+                }
+
+                fragments.add(convertMessageTemplate
+                        .replace(":ProtoType:", message.getName())
+                        .replace(":Type:", typeName)
+                        .replace(":Body:", body.toString()));
+            }
+
+            for (final var fragment : fragments) {
+                if (converterBody.length() > 0) {
+                    converterBody.append("\n\n");
+                }
+
+                converterBody.append(fragment);
+            }
+        }
+
+        var code = converterTemplate.replace(":Body:", converterBody.toString());
+
+        var converterFile = new File(rootDir, "PhoenixSql.Host\\src\\main\\java\\com\\chequer\\phoenixsql\\util\\NodeConverter.java");
+        var javaWriter = new FileWriter(converterFile);
+        javaWriter.write(code);
+        javaWriter.close();
+    }
+
+    private static String getJavaSimpleTypeName(Class<?> clazz) {
+        return clazz.getCanonicalName().substring(clazz.getPackageName().length() + 1);
+    }
+
     private static void generate(TypeTreeNode node) {
         if (node.typeInfo != null) {
             if (generateData.containsKey(node.typeInfo)) {
@@ -273,17 +453,8 @@ public class Main {
 
             generateData.put(node.typeInfo, data);
 
-            List<GenerateData> inheritMap = new ArrayList<>();
-
             if (!node.hasChildren()) {
-                var parentNode = node.getParent();
-
-                while (parentNode != null) {
-                    inheritMap.add(0, generateData.get(parentNode.typeInfo));
-                    parentNode = parentNode.getParent();
-                }
-
-                for (final var inherit : inheritMap) {
+                for (final var inherit : getInheritMap(node, false)) {
                     for (final var inheritField : inherit.inheritMembers) {
                         data.message.add(inheritField);
                     }
@@ -292,10 +463,9 @@ public class Main {
 
             var protoMembers = new ArrayList<ProtoMember>();
             var csProperties = new ArrayList<CSharpPropertyInfo>();
+            var javaProperties = new ArrayList<MethodInfo>();
 
             protoMembers.add(new ProtoSingLineComment(node.typeInfo.getFullName()));
-
-            System.out.println(node.typeInfo.getName());
 
             for (final var property : getProperties(node.typeInfo)) {
                 var protoField = new ProtoField();
@@ -325,17 +495,20 @@ public class Main {
                 protoField.setName(getProtoFieldName(property));
 
                 protoMembers.add(protoField);
+
                 csProperties.add(new CSharpPropertyInfo(
                         getCSharpTypeName(returnType, protoType, protoField.isRepeated()),
                         getCSharpPropertyName(property)));
 
-                System.out.printf(" * %s %s%n", protoType.getName(), protoField.getName());
+                javaProperties.add(property);
             }
+
+            data.javaProperties = javaProperties;
 
             if (node.hasChildren()) {
                 data.inheritMembers = protoMembers;
 
-                data.csInterface = true;
+                data.isInterface = true;
                 data.csTypeName = getCSharpTypeName(node.typeInfo, null, false);
                 data.csProperties = csProperties;
 
@@ -350,7 +523,7 @@ public class Main {
                     data.message.add(protoField);
                 }
 
-                for (final var inheritData : inheritMap) {
+                for (final var inheritData : getInheritMap(node, false)) {
                     var protoField = new ProtoField();
                     protoField.setType(new ProtoType(data.message.getName(), null));
                     protoField.setName(data.message.getName());
@@ -369,10 +542,6 @@ public class Main {
 
     private static ProtoType resolveProtoType(ProtoMessage holder, TypeInfo returnType) {
         var returnTypeNode = typeTree.get(returnType);
-
-        if (returnType.getName().equals("Action")) {
-            System.out.println(returnType.isEnum());
-        }
 
         if (returnTypeNode != null) {
             return new ProtoType(getProtoMessageName(returnTypeNode), null);
@@ -538,8 +707,29 @@ public class Main {
         return properties;
     }
 
-    private static String convertToCamelCase(String value) {
-        return Character.toLowerCase(value.charAt(0)) + value.substring(1);
+    private static List<GenerateData> getInheritMap(TypeTreeNode node, boolean withSelf) {
+        if (node == null) {
+            return null;
+        }
+
+        var inheritMap = new ArrayList<GenerateData>();
+
+        var parentNode = node.getParent();
+
+        while (parentNode != null) {
+            inheritMap.add(0, generateData.get(parentNode.typeInfo));
+            parentNode = parentNode.getParent();
+        }
+
+        if (withSelf) {
+            inheritMap.add(generateData.get(node.typeInfo));
+        }
+
+        return inheritMap;
+    }
+
+    private static String toPascalCase(String value) {
+        return Character.toUpperCase(value.charAt(0)) + value.substring(1);
     }
 
     private static class GenerateData {
@@ -550,9 +740,10 @@ public class Main {
         public List<ProtoMember> inheritMembers;
         public ProtoFieldOneOf inheritField;
 
-        public boolean csInterface;
+        public boolean isInterface;
         public String csTypeName;
         public List<CSharpPropertyInfo> csProperties;
+        public List<MethodInfo> javaProperties;
 
         public GenerateData(TypeInfo type) {
             this.type = type;

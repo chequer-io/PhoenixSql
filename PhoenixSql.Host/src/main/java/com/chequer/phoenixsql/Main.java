@@ -2,12 +2,15 @@ package com.chequer.phoenixsql;
 
 import com.chequer.phoenixsql.proto.Handshake;
 import com.chequer.phoenixsql.proto.HandshakeServiceGrpc;
+import com.chequer.phoenixsql.proto.Nodes;
 import io.grpc.ManagedChannelBuilder;
+import org.apache.phoenix.parse.DropColumnStatement;
 
 import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
+
         int handshakePort = Integer.parseInt(args[0]);
 
         try {

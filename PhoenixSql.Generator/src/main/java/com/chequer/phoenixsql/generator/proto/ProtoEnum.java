@@ -6,6 +6,7 @@ import java.util.List;
 public class ProtoEnum extends ProtoMember {
     private final String name;
     private final List<String> values = new ArrayList<>();
+    public final List<String> lastGeneratedValues = new ArrayList<>();
 
     public ProtoEnum(String name) {
         this.name = name;

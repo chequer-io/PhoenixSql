@@ -5,8 +5,6 @@ package proto;
 option csharp_namespace = "PhoenixSql";
 option java_package = "com.chequer.phoenixsql.proto";
 
-import "google/protobuf/any.proto";
-
 enum Action {
     READ = 0;
     WRITE = 1;
@@ -1094,7 +1092,7 @@ message LiteralParseNode {
     // org.apache.phoenix.parse.TerminalParseNode
     // org.apache.phoenix.parse.LiteralParseNode
     PDataType type = 4;
-    google.protobuf.Any value = 5;
+    string value = 5;
 }
 
 message WildcardParseNode {

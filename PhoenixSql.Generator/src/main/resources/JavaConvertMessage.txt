@@ -1,0 +1,9 @@
+    public static Nodes.:ProtoType:.Builder convert(:Type: value) {
+        if (value == null) return null;
+
+        var builder = Nodes.:ProtoType:.newBuilder();
+
+:Body:
+
+        return builder;
+    }

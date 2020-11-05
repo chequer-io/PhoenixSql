@@ -1,0 +1,3 @@
+    public static Nodes.:ProtoType: convert(:Type: value) {
+:Body:
+    }
