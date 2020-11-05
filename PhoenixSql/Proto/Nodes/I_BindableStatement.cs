@@ -1,11 +1,11 @@
-﻿namespace PhoenixSql
+namespace PhoenixSql
 {
-    public partial class I_BindableStatement : IBindableStatement
+    public partial class I_BindableStatement : IProxyMessage<IBindableStatement>, IBindableStatement
     {
-        public int BindCount => Value.BindCount;
+        public int BindCount => Message.BindCount;
 
-        public Operation Operation => Value.Operation;
+        public Operation Operation => Message.Operation;
 
-        public IBindableStatement Value => (IBindableStatement)inherit_;
+        public IBindableStatement Message => (IBindableStatement)inherit_;
     }
 }

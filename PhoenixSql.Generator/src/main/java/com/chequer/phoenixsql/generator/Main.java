@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
-
 public class Main {
     private static File rootDir;
     private static File csharpNodeDir;
@@ -90,6 +89,18 @@ public class Main {
         put(ProtoScalaType.BOOL.value, "bool");
         put(ProtoScalaType.STRING.value, "string");
     }};
+
+    private static final Set<Class<?>> toRpcConvertTypes = new HashSet<>() {{
+        add(PDataType.class);
+        add(PName.class);
+        add(LiteralExpression.class);
+        add(Object.class);
+        add(org.apache.hadoop.hbase.util.Pair.class);
+    }};
+
+    private static final String indent1 = "    ";
+    private static final String indent2 = "        ";
+    private static final String indent3 = "            ";
 
     private static final Map<TypeInfo, GenerateData> generateData = new HashMap<>();
 
@@ -187,7 +198,7 @@ public class Main {
             if (inheritMap != null) {
                 for (final var inherit : inheritMap) {
                     for (final var inheritField : inherit.inheritMembers) {
-                        data.message.add(inheritField);
+                        data.absMessage.add(inheritField);
                     }
                 }
             }
@@ -197,7 +208,13 @@ public class Main {
             csWriter.write("namespace PhoenixSql\n");
             csWriter.write("{\n");
 
+            if (data.message != null) {
+                writeCSharpClass(data);
+            }
+
             if (data.isInterface) {
+                writeCSharpProxyClass(data);
+
                 csWriter.write(String.format("    public interface %s", data.csTypeName));
 
                 if (extended) {
@@ -261,18 +278,71 @@ public class Main {
         }
     }
 
+    private static void writeCSharpClass(GenerateData data) throws IOException {
+        final var template = ResourceUtil.readString("CSharpClass.txt");
+        assert template != null;
+
+        var inheritMap = getInheritMap(typeTree.get(data.type), true);
+
+        var file = new File(csharpNodeDir, data.message.getName() + ".cs");
+        var body = new StringBuilder();
+
+        if (inheritMap != null && inheritMap.size() > 0) {
+            for (final var inheritData : inheritMap) {
+                for (final var inheritProperty : inheritData.csProperties) {
+                    if (inheritProperty.type.contains("IParseNode")) {
+                        body.append(indent2);
+                        body.append(String.format("%s %s.%s => %s;\n\n",
+                                inheritProperty.type,
+                                inheritData.csTypeName,
+                                inheritProperty.name,
+                                inheritProperty.name));
+                    }
+                }
+            }
+        }
+
+        var code = template
+                .replace("[ProtoType]", data.message.getName())
+                .replace("[Type]", data.type.getName())
+                .replace("[Body]", body.toString().replaceAll("\\s+$", ""));
+
+        var writer = new FileWriter(file);
+        writer.write(code);
+        writer.close();
+    }
+
+    private static void writeCSharpProxyClass(GenerateData data) throws IOException {
+        final var template = ResourceUtil.readString("CSharpProxyClass.txt");
+        assert template != null;
+
+        var file = new File(csharpNodeDir, data.absMessage.getName() + ".cs");
+        var body = new StringBuilder();
+
+        for (final var inheritData : getInheritMap(typeTree.get(data.type), true)) {
+            for (final var inheritProperty : inheritData.csProperties) {
+                body.append(indent2);
+                body.append(String.format("public %s %s => Message.%s;\n\n",
+                        inheritProperty.type,
+                        inheritProperty.name,
+                        inheritProperty.name));
+            }
+        }
+
+        body.append(indent2);
+        body.append(String.format("public I%s Message => (I%s)inherit_;", data.type.getName(), data.type.getName()));
+
+        var code = template
+                .replace("[ProtoType]", data.absMessage.getName())
+                .replace("[Type]", data.type.getName())
+                .replace("[Body]", body);
+
+        var writer = new FileWriter(file);
+        writer.write(code);
+        writer.close();
+    }
+
     private static void writeJava() throws Exception {
-        final var convertTypes = new HashSet<Class<?>>() {{
-            add(PDataType.class);
-            add(PName.class);
-            add(LiteralExpression.class);
-            add(Object.class);
-            add(org.apache.hadoop.hbase.util.Pair.class);
-        }};
-
-        final var indent2 = "        ";
-        final var indent3 = "            ";
-
         final var convertEnumTemplate = ResourceUtil.readString("JavaConvertEnum.txt");
         final var convertMessageTemplate = ResourceUtil.readString("JavaConvertMessage.txt");
         final var converterTemplate = ResourceUtil.readString("JavaNodeConverter.txt");
@@ -314,24 +384,27 @@ public class Main {
                 body.append(indent2).append(String.format("return Nodes.%s.%s;", message.getName(), values.get(values.size() - 1)));
 
                 fragments.add(convertEnumTemplate
-                        .replace(":ProtoType:", message.getName())
-                        .replace(":Type:", typeName)
-                        .replace(":Body:", body.toString()));
+                        .replace("[ProtoType]", message.getName())
+                        .replace("[Type]", typeName)
+                        .replace("[Body]", body.toString()));
             } else {
-                var message = data.message;
+                var message = data.absMessage;
+                boolean hasDefault = data.message != null;
 
                 var body = new StringBuilder();
 
                 if (data.isInterface) {
                     var fields = data.inheritField.fields();
+                    boolean write = false;
 
-                    for (int i = 0; i < fields.size(); i++) {
+                    for (int i = hasDefault ? 1 : 0; i < fields.size(); i++) {
                         var field = fields.get(i);
 
                         body.append(indent2);
 
-                        if (i == 0) {
+                        if (!write) {
                             body.append("if ");
+                            write = true;
                         } else {
                             body.append("} else if ");
                         }
@@ -340,107 +413,34 @@ public class Main {
                         body.append(indent3).append(String.format("builder.set%s(convert((%s) value));\n", field.getName(), field.getName()));
                     }
 
-                    if (fields.size() > 0) {
+                    if (write) {
+                        body.append(indent2).append("}");
+                    }
+
+                    if (hasDefault) {
+                        if (write) {
+                            body.append(" else {\n");
+                        }
+
+                        body.append(indent3).append(String.format("var defBuilder = Nodes.%s.newBuilder();\n\n", data.message.getName()));
+
+                        writeJavaGenerateFragment(typeNode, data.message, body, fragments, "defBuilder", indent3);
+                        body.append("\n\n");
+
+                        body.append(indent3).append(String.format("builder.set%s(defBuilder);\n", data.message.getName()));
                         body.append(indent2).append("}");
                     }
                 } else if (typeNode != null) {
-                    var fields = message.stream()
-                            .filter(m -> m instanceof ProtoField)
-                            .map(m -> (ProtoField) m)
-                            .collect(Collectors.toList());
-
-                    var map = getInheritMap(typeNode, true);
-                    int index = -1;
-                    int variable = -1;
-
-                    for (final var inheritData : map) {
-                        for (final var inheritProperty : inheritData.javaProperties) {
-                            index++;
-                            var protoField = fields.get(index);
-                            var returnType = inheritProperty.getReturnType();
-                            var protoMethodName = toPascalCase(protoField.getName());
-
-                            if (protoField.isRepeated()) {
-                                TypeInfo elementType;
-                                var converterName = "convert";
-
-                                if (returnType.isArray()) {
-                                    elementType = returnType.getElementType();
-                                } else {
-                                    var genericReturnType = TypeInfo.get((ParameterizedType) inheritProperty.getGenericReturnType());
-                                    elementType = genericReturnType.getGenericTypeArguments().get(0);
-                                }
-
-                                if (hbasePairType.isAssignableFrom(elementType)) {
-                                    var pairConvertBody = new StringBuilder();
-
-                                    var t1 = elementType.getGenericTypeArguments().get(0);
-                                    var t2 = elementType.getGenericTypeArguments().get(1);
-
-                                    var needConvert1 = convertTypes.contains(t1.unwrap()) || generateData.containsKey(t1);
-                                    var needConvert2 = convertTypes.contains(t2.unwrap()) || generateData.containsKey(t2);
-
-                                    var paramTypeName = String.format("Pair<%s, %s>", getJavaSimpleTypeName(t1.unwrap()), getJavaSimpleTypeName(t2.unwrap()));
-                                    var pairTypeName = String.format("%s.Pair_%s_%s", message.getName(), t1.getName(), t2.getName());
-                                    converterName = String.format("convertPair%s%s", t1.getName(), t2.getName());
-
-                                    if (needConvert1) {
-                                        pairConvertBody.append(indent2).append("builder.setFirst(convert(value.getFirst()));\n");
-                                    } else {
-                                        pairConvertBody.append(indent2).append("builder.setFirst(value.getFirst());\n");
-                                    }
-
-                                    if (needConvert2) {
-                                        pairConvertBody.append(indent2).append("builder.setSecond(convert(value.getSecond()));\n");
-                                    } else {
-                                        pairConvertBody.append(indent2).append("builder.setSecond(value.getSecond());");
-                                    }
-
-                                    fragments.add(convertMessageTemplate
-                                            .replace(":Name:", converterName)
-                                            .replace(":ProtoType:", pairTypeName)
-                                            .replace(":Type:", paramTypeName)
-                                            .replace(":Body:", pairConvertBody.toString()));
-                                }
-
-                                var needConvert = convertTypes.contains(elementType.unwrap()) || generateData.containsKey(elementType);
-
-                                if (needConvert) {
-                                    body.append(indent2).append(String.format("addAll(value.%s(), NodeConverter::%s, builder::add%s);", inheritProperty.getName(), converterName, protoMethodName));
-                                } else if (inheritProperty.getName().equals("getUdfParseNodes")) {
-                                    body.append(indent2).append("addAll(value.getUdfParseNodes(), builder::addUdfParseNodes);");
-                                } else {
-                                    body.append(indent2).append("//  -- REPEATED : ").append(inheritProperty.getName());
-                                }
-                            } else if (convertTypes.contains(returnType.unwrap()) || generateData.containsKey(returnType)) {
-                                var variableName = "v" + ++variable;
-
-                                body.append(indent2).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
-                                body.append(indent2).append(String.format("if (%s != null) builder.set%s(convert(%s));", variableName, protoMethodName, variableName));
-                            } else if (!returnType.unwrap().isPrimitive()) {
-                                var variableName = "v" + ++variable;
-
-                                body.append(indent2).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
-                                body.append(indent2).append(String.format("if (%s != null) builder.set%s(%s);", variableName, protoMethodName, variableName));
-                            } else {
-                                body.append(indent2).append(String.format("builder.set%s(value.%s());", protoMethodName, inheritProperty.getName()));
-                            }
-
-                            if (index < fields.size() - 1) {
-                                body.append('\n');
-                            }
-                        }
-                    }
-
+                    writeJavaGenerateFragment(typeNode, message, body, fragments, "builder", indent2);
                 } else {
                     throw new Exception();
                 }
 
                 fragments.add(convertMessageTemplate
-                        .replace(":Name:", "convert")
-                        .replace(":ProtoType:", message.getName())
-                        .replace(":Type:", typeName)
-                        .replace(":Body:", body.toString()));
+                        .replace("[Name]", "convert")
+                        .replace("[ProtoType]", message.getName())
+                        .replace("[Type]", typeName)
+                        .replace("[Body]", body.toString()));
             }
 
             for (final var fragment : fragments) {
@@ -452,12 +452,112 @@ public class Main {
             }
         }
 
-        var code = converterTemplate.replace(":Body:", converterBody.toString());
+        var code = converterTemplate.replace("[Body]", converterBody.toString());
 
         var converterFile = new File(rootDir, "PhoenixSql.Host\\src\\main\\java\\com\\chequer\\phoenixsql\\util\\NodeConverter.java");
         var javaWriter = new FileWriter(converterFile);
         javaWriter.write(code);
         javaWriter.close();
+    }
+
+    private static void writeJavaGenerateFragment(
+            TypeTreeNode typeNode,
+            ProtoMessage message,
+            StringBuilder body,
+            List<String> fragments,
+            String builderName,
+            String indent) throws Exception {
+
+        final var convertMessageTemplate = ResourceUtil.readString("JavaConvertMessage.txt");
+        assert convertMessageTemplate != null;
+
+        var fields = message.stream()
+                .filter(m -> m instanceof ProtoField)
+                .map(m -> (ProtoField) m)
+                .collect(Collectors.toList());
+
+        var map = getInheritMap(typeNode, true);
+        int index = -1;
+        int variable = -1;
+
+        for (final var inheritData : map) {
+            for (final var inheritProperty : inheritData.javaProperties) {
+                index++;
+                var protoField = fields.get(index);
+                var returnType = inheritProperty.getReturnType();
+                var protoMethodName = toPascalCase(protoField.getName());
+
+                if (protoField.isRepeated()) {
+                    TypeInfo elementType;
+                    var converterName = "convert";
+
+                    if (returnType.isArray()) {
+                        elementType = returnType.getElementType();
+                    } else {
+                        var genericReturnType = TypeInfo.get((ParameterizedType) inheritProperty.getGenericReturnType());
+                        elementType = genericReturnType.getGenericTypeArguments().get(0);
+                    }
+
+                    if (hbasePairType.isAssignableFrom(elementType)) {
+                        var pairConvertBody = new StringBuilder();
+
+                        var t1 = elementType.getGenericTypeArguments().get(0);
+                        var t2 = elementType.getGenericTypeArguments().get(1);
+
+                        var needConvert1 = toRpcConvertTypes.contains(t1.unwrap()) || generateData.containsKey(t1);
+                        var needConvert2 = toRpcConvertTypes.contains(t2.unwrap()) || generateData.containsKey(t2);
+
+                        var paramTypeName = String.format("Pair<%s, %s>", getJavaSimpleTypeName(t1.unwrap()), getJavaSimpleTypeName(t2.unwrap()));
+                        var pairTypeName = String.format("%s.Pair_%s_%s", message.getName(), t1.getName(), t2.getName());
+                        converterName = String.format("convertPair%s%s", t1.getName(), t2.getName());
+
+                        if (needConvert1) {
+                            pairConvertBody.append(indent).append(builderName).append(".setFirst(convert(value.getFirst()));\n");
+                        } else {
+                            pairConvertBody.append(indent).append(builderName).append(".setFirst(value.getFirst());\n");
+                        }
+
+                        if (needConvert2) {
+                            pairConvertBody.append(indent).append(builderName).append(".setSecond(convert(value.getSecond()));\n");
+                        } else {
+                            pairConvertBody.append(indent).append(builderName).append(".setSecond(value.getSecond());");
+                        }
+
+                        fragments.add(convertMessageTemplate
+                                .replace("[Name]", converterName)
+                                .replace("[ProtoType]", pairTypeName)
+                                .replace("[Type]", paramTypeName)
+                                .replace("[Body]", pairConvertBody.toString()));
+                    }
+
+                    var needConvert = toRpcConvertTypes.contains(elementType.unwrap()) || generateData.containsKey(elementType);
+
+                    if (needConvert) {
+                        body.append(indent).append(String.format("addAll(value.%s(), NodeConverter::%s, %s::add%s);", inheritProperty.getName(), converterName, builderName, protoMethodName));
+                    } else if (inheritProperty.getName().equals("getUdfParseNodes")) {
+                        body.append(indent).append(String.format("addAll(value.getUdfParseNodes(), %s::addUdfParseNodes);", builderName));
+                    } else {
+                        throw new Exception();
+                    }
+                } else if (toRpcConvertTypes.contains(returnType.unwrap()) || generateData.containsKey(returnType)) {
+                    var variableName = "v" + ++variable;
+
+                    body.append(indent).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
+                    body.append(indent).append(String.format("if (%s != null) %s.set%s(convert(%s));", variableName, builderName, protoMethodName, variableName));
+                } else if (!returnType.unwrap().isPrimitive()) {
+                    var variableName = "v" + ++variable;
+
+                    body.append(indent).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
+                    body.append(indent).append(String.format("if (%s != null) %s.set%s(%s);", variableName, builderName, protoMethodName, variableName));
+                } else {
+                    body.append(indent).append(String.format("%s.set%s(value.%s());", builderName, protoMethodName, inheritProperty.getName()));
+                }
+
+                if (index < fields.size() - 1) {
+                    body.append('\n');
+                }
+            }
+        }
     }
 
     private static String getJavaSimpleTypeName(Class<?> clazz) {
@@ -471,14 +571,14 @@ public class Main {
             }
 
             var data = new GenerateData(node.typeInfo);
-            data.message = new ProtoMessage(getProtoMessageName(node));
+            data.absMessage = new ProtoMessage(getProtoMessageName(node));
 
             generateData.put(node.typeInfo, data);
 
             if (!node.hasChildren()) {
                 for (final var inherit : getInheritMap(node, false)) {
                     for (final var inheritField : inherit.inheritMembers) {
-                        data.message.add(inheritField);
+                        data.absMessage.add(inheritField);
                     }
                 }
             }
@@ -510,7 +610,7 @@ public class Main {
                 }
 
                 if (protoType == null) {
-                    protoType = resolveProtoType(data.message, returnType);
+                    protoType = resolveProtoType(data.absMessage, returnType);
                 }
 
                 protoField.setType(protoType);
@@ -537,24 +637,40 @@ public class Main {
                 data.inheritField = new ProtoFieldOneOf();
                 data.inheritField.setName("inherit");
 
-                data.message.add(data.inheritField);
+                data.absMessage.add(data.inheritField);
             } else {
-                data.csTypeName = data.message.getName();
+                data.csTypeName = data.absMessage.getName();
 
                 for (final var protoField : protoMembers) {
-                    data.message.add(protoField);
+                    data.absMessage.add(protoField);
                 }
 
                 for (final var inheritData : getInheritMap(node, false)) {
                     var protoField = new ProtoField();
-                    protoField.setType(new ProtoType(data.message.getName(), null));
-                    protoField.setName(data.message.getName());
+                    protoField.setType(new ProtoType(data.absMessage.getName(), null));
+                    protoField.setName(data.absMessage.getName());
 
                     inheritData.inheritField.fields().add(protoField);
                 }
             }
 
-            proto.add(data.message);
+            proto.add(data.absMessage);
+
+            // --
+
+            if (node.hasChildren() && !node.typeInfo.isAbstract()) {
+                data.message = new ProtoMessage(node.typeInfo.getName());
+
+                for (final var inheritData : getInheritMap(node, true)) {
+                    for (final var inheritMember : inheritData.inheritMembers) {
+                        data.message.add(inheritMember);
+                    }
+                }
+
+                data.inheritField.fields().add(new ProtoField(data.message.getName(), new ProtoType(data.message.getName(), null)));
+
+                proto.add(data.message);
+            }
         }
 
         for (final var childNode : node.children) {
@@ -757,6 +873,7 @@ public class Main {
     private static class GenerateData {
         public final TypeInfo type;
         public ProtoMessage message;
+        public ProtoMessage absMessage;
         public ProtoEnum enumMessage;
 
         public List<ProtoMember> inheritMembers;
@@ -772,8 +889,8 @@ public class Main {
         }
 
         public ProtoType getProtoType() {
-            if (message != null) {
-                return new ProtoType(message.getName(), null);
+            if (absMessage != null) {
+                return new ProtoType(absMessage.getName(), null);
             }
 
             return new ProtoType(enumMessage.getName(), null);

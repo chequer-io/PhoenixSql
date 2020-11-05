@@ -1,9 +1,9 @@
-    public static Nodes.:ProtoType:.Builder :Name:(:Type: value) {
+    public static Nodes.[ProtoType].Builder [Name]([Type] value) {
         if (value == null) return null;
 
-        var builder = Nodes.:ProtoType:.newBuilder();
+        var builder = Nodes.[ProtoType].newBuilder();
 
-:Body:
+[Body]
 
         return builder;
     }

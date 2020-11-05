@@ -1,9 +1,9 @@
-﻿namespace PhoenixSql
+namespace PhoenixSql
 {
-    public partial class W_TableNode : ITableNode
+    public partial class W_TableNode : IProxyMessage<ITableNode>, ITableNode
     {
-        public string Alias => Value.Alias;
+        public string Alias => Message.Alias;
 
-        public ITableNode Value => (ITableNode)inherit_;
+        public ITableNode Message => (ITableNode)inherit_;
     }
 }

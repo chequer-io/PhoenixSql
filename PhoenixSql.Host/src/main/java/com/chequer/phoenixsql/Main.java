@@ -13,6 +13,8 @@ public class Main {
         int handshakePort = Integer.parseInt(args[0]);
 
         try {
+            disableWarning();
+
             var hostServer = new HostServer();
             hostServer.start();
 
@@ -22,6 +24,11 @@ public class Main {
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void disableWarning() {
+        System.err.close();
+        System.setErr(System.out);
     }
 
     private static void handshake(int handshakePort, int hostPort) {

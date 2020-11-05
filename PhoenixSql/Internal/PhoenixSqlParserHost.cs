@@ -34,6 +34,11 @@ namespace PhoenixSql.Internal
             Connect();
         }
 
+        public void Initialize()
+        {
+            _event.WaitOne();
+        }
+
         private void Reconnect()
         {
             Shutdown();
@@ -98,7 +103,10 @@ namespace PhoenixSql.Internal
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = PathUtility.GetRuntimePath(),
-                    Arguments = $"-jar {hostLibrary} {boundPort}"
+                    Arguments = $"-jar {hostLibrary} {boundPort}",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
                 },
                 EnableRaisingEvents = true
             };
@@ -208,7 +216,7 @@ namespace PhoenixSql.Internal
             {
                 _event.WaitOne();
                 VerifyStatus(HostStatus.Connected);
-                return _hostService.parse(new ParseRequest { Sql = sql }).Value;
+                return _hostService.parse(new ParseRequest { Sql = sql }).Message;
             }
             catch (RpcException e)
             {
@@ -222,7 +230,7 @@ namespace PhoenixSql.Internal
             {
                 _event.WaitOne();
                 VerifyStatus(HostStatus.Connected);
-                return (await _hostService.parseAsync(new ParseRequest { Sql = sql })).Value;
+                return (await _hostService.parseAsync(new ParseRequest { Sql = sql })).Message;
             }
             catch (RpcException e)
             {

@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
+using Google.Protobuf;
+using Google.Protobuf.Collections;
 
 namespace PhoenixSql.Sample
 {
@@ -9,6 +14,8 @@ namespace PhoenixSql.Sample
         private static void Main(string[] args)
         {
             var defaultColor = Console.ForegroundColor;
+
+            Console.Clear();
 
             while (true)
             {
@@ -24,12 +31,16 @@ namespace PhoenixSql.Sample
                     var statement = PhoenixSqlParser.Parse(sql);
                     sw.Stop();
 
-                    Print(statement);
-
+                    Console.ForegroundColor = ConsoleColor.Magenta;
                     Console.WriteLine($"parsed in {sw.Elapsed.TotalMilliseconds:0.00} ms");
+
+                    Console.WriteLine();
+
+                    Print(null, statement);
                 }
                 catch (Exception e)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(e);
                 }
 
@@ -37,12 +48,66 @@ namespace PhoenixSql.Sample
             }
         }
 
-        private static void Print(IBindableStatement statement, int depth = 0)
+        private static void Print(string key, object node, int depth = 0)
         {
+            if (node is IProxyMessage<object> abstractMessage)
+            {
+                Print(key, abstractMessage.Message, depth);
+                return;
+            }
+
             if (depth > 0)
                 Console.Write(new string(' ', depth * 4));
 
-            Console.WriteLine(statement.GetType().Name);
+            if (key != null)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write($"{key}: ");
+            }
+
+            if (node is IMessage)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(node.GetType().Name);
+
+                foreach (var propertyInfo in node.GetType().GetRuntimeProperties().Where(p => !p.GetMethod!.IsStatic))
+                {
+                    var value = propertyInfo.GetValue(node);
+
+                    if (!(value is string) && value is IEnumerable enumerable)
+                    {
+                        foreach (var child in enumerable)
+                        {
+                            Print(null, child, depth + 1);
+                        }
+
+                        continue;
+                    }
+
+                    if (propertyInfo.PropertyType.Assembly == typeof(IMessage).Assembly)
+                    {
+                        continue;
+                    }
+
+                    switch (value)
+                    {
+                        case null:
+                        case string strValue when string.IsNullOrEmpty(strValue):
+                        case bool boolValue when !boolValue:
+                        case int intValue when intValue == 0:
+                            continue;
+
+                        default:
+                            Print(propertyInfo.Name, value, depth + 1);
+                            break;
+                    }
+                }
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(node);
+            }
         }
     }
 }

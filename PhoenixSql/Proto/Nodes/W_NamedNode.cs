@@ -1,11 +1,11 @@
-﻿namespace PhoenixSql
+namespace PhoenixSql
 {
-    public partial class W_NamedNode : INamedNode
+    public partial class W_NamedNode : IProxyMessage<INamedNode>, INamedNode
     {
-        public string Name => Value.Name;
+        public string Name => Message.Name;
 
-        public bool IsCaseSensitive => Value.IsCaseSensitive;
+        public bool IsCaseSensitive => Message.IsCaseSensitive;
 
-        public INamedNode Value => (INamedNode)inherit_;
+        public INamedNode Message => (INamedNode)inherit_;
     }
 }

@@ -19,7 +19,7 @@ import java.util.function.Function;
 public class NodeConverter {
     private static final Gson gson = new Gson();
 
-:Body:
+[Body]
 
     private static String convert(LiteralExpression value) {
         return value.toString();
