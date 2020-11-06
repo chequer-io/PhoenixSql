@@ -70,15 +70,20 @@ namespace PhoenixSql.Sample
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine(node.GetType().Name);
 
-                foreach (var propertyInfo in node.GetType().GetRuntimeProperties().Where(p => !p.GetMethod!.IsStatic))
+                foreach (var propertyInfo in node.GetType().GetProperties().Where(p => !p.GetMethod!.IsStatic))
                 {
+                    if (propertyInfo.DeclaringType.IsInterface)
+                        continue;
+
                     var value = propertyInfo.GetValue(node);
 
                     if (!(value is string) && value is IEnumerable enumerable)
                     {
+                        int index = 0;
+
                         foreach (var child in enumerable)
                         {
-                            Print(null, child, depth + 1);
+                            Print($"{propertyInfo.Name}[{index++}]", child, depth + 1);
                         }
 
                         continue;
@@ -95,6 +100,7 @@ namespace PhoenixSql.Sample
                         case string strValue when string.IsNullOrEmpty(strValue):
                         case bool boolValue when !boolValue:
                         case int intValue when intValue == 0:
+                        case double doubleValue when Math.Abs(doubleValue) < double.Epsilon:
                             continue;
 
                         default:
