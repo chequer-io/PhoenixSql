@@ -6,7 +6,7 @@
 [![Nuget](https://img.shields.io/nuget/v/PhoenixSql)](https://www.nuget.org/packages/PhoenixSql/)
 
 
-Phoenix sql parser for .NET Core using [phoenix-core](https://mvnrepository.com/artifact/org.apache.phoenix/phoenix-core) library.
+Phoenix sql parser for .NET Core using [phoenix](https://github.com/apache/phoenix) source code.
 
 ## Installation
 
