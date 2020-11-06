@@ -5,9 +5,20 @@
         <RootNamespace>PhoenixSql</RootNamespace>
     </PropertyGroup>
 
+    <PropertyGroup Label="Nuspec">
+        <Description>Phoenix sql parser for .NET using phoenix-core.jar</Description>
+        <Authors>CHEQUER</Authors>
+        <Company>CHEQUER</Company>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <RepositoryUrl>https://github.com/chequer-io/PhoenixSql</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/chequer-io/PhoenixSql</PackageProjectUrl>
+        <PackageIcon>Logo.png</PackageIcon>
+        <Version>1.0.0</Version>
+    </PropertyGroup>
+
     <ItemGroup>
-        <PackageReference Include="Google.Protobuf" Version="3.10.1" />
-        <PackageReference Include="Grpc" Version="2.24.0" />
+        <PackageReference Include="Google.Protobuf" Version="3.10.1"/>
+        <PackageReference Include="Grpc" Version="2.24.0"/>
         <PackageReference Include="Grpc.Tools" Version="2.24.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,11 +41,15 @@
             <Visible>False</Visible>
             <PackagePath>build</PackagePath>
         </None>
+
+        <None Include="..\LICENSE">
+            <Pack>True</Pack>
+        </None>
+
+        <None Include="..\Logo.png">
+            <Pack>True</Pack>
+        </None>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Proto\Nodes" />
-    </ItemGroup>
-
-    <Import Project="J2NET.props" />
+    <Import Project="J2NET.props"/>
 </Project>
