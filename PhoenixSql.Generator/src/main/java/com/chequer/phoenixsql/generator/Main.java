@@ -2,7 +2,9 @@ package com.chequer.phoenixsql.generator;
 
 import com.chequer.phoenixsql.generator.proto.*;
 import com.chequer.phoenixsql.generator.reflection.*;
+import com.chequer.phoenixsql.generator.util.IterableUtil;
 import com.chequer.phoenixsql.generator.util.ResourceUtil;
+import com.chequer.phoenixsql.generator.util.StringUtil;
 import org.apache.phoenix.expression.LiteralExpression;
 import org.apache.phoenix.parse.*;
 import org.apache.phoenix.schema.PName;
@@ -55,13 +57,11 @@ public class Main {
         add("org.apache.phoenix.parse.HintNode.isEmpty");
         add("org.apache.phoenix.parse.ColumnName.getColumnName");
         add("org.apache.phoenix.parse.ColumnName.getFamilyName");
+        add("org.apache.phoenix.parse.SelectStatement.getInnerSelectStatement");
 
-        add("org.apache.phoenix.parse.AddColumnStatement.getProps");
-        add("org.apache.phoenix.parse.AlterIndexStatement.getProps");
-        add("org.apache.phoenix.parse.CreateTableStatement.getProps");
-        add("org.apache.phoenix.parse.CreateIndexStatement.getProps");
-        add("org.apache.phoenix.parse.AlterSessionStatement.getProps");
-        add("org.apache.phoenix.parse.UpdateStatisticsStatement.getProps");
+        add("org.apache.phoenix.parse.*.has*");
+        add("org.apache.phoenix.parse.*.toString");
+        add("org.apache.phoenix.parse.*.getProps");
     }};
 
     private static final Map<TypeInfo, ProtoType> protoScalarTypes = new HashMap<>() {{
@@ -174,6 +174,7 @@ public class Main {
 
         var types = Stream.concat(additionalGenerateTypes.stream(), generateTypes)
                 .filter(t -> !t.isNative())
+                .sorted(Comparator.comparing(TypeInfo::getFullName))
                 .collect(Collectors.toList());
 
         typeTree = TypeTree.build(types, Main::isPhoenixType);
@@ -831,15 +832,12 @@ public class Main {
 
             var name = methodInfo.getName();
 
-            if (!name.startsWith("get") && !name.startsWith("is")) {
-                continue;
-            }
-
             if (methodInfo.getBaseDefinition() != null) {
                 continue;
             }
 
-            if (excludeProperties.contains(methodInfo.getFullName())) {
+            if (IterableUtil.any(excludeProperties, p -> StringUtil.isMatch(methodInfo.getFullName(), p))) {
+                System.out.println(methodInfo.getFullName());
                 continue;
             }
 
