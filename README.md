@@ -11,7 +11,7 @@ Phoenix sql parser for .NET Core using [phoenix](https://github.com/apache/phoen
 ## Installation
 
 ### 1. Install NuGet pacakge
-Install the latest version of the [PhoenixSql](https://www.nuget.org/packages/CUBRID.Data/) package from NuGet.
+Install the latest version of the [PhoenixSql](https://www.nuget.org/packages/PhoenixSql/) package from NuGet.
 
 ### 2. Add J2NET Runtime package reference
 Paste the following XML into your Project(*.csproj / .vbproj / .fsproj*) file.
