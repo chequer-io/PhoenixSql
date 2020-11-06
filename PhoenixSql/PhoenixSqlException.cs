@@ -25,8 +25,14 @@ namespace PhoenixSql
 
     public sealed class PhoenixSqlSyntaxException : PhoenixSqlException
     {
-        internal PhoenixSqlSyntaxException(string message) : base(message)
+        public int Line { get; }
+
+        public int Column { get; }
+
+        internal PhoenixSqlSyntaxException(int line, int column, string message) : base(message)
         {
+            Line = line;
+            Column = column;
         }
     }
 

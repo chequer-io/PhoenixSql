@@ -15,8 +15,6 @@ namespace PhoenixSql.Sample
         {
             var defaultColor = Console.ForegroundColor;
 
-            Console.Clear();
-
             while (true)
             {
                 try

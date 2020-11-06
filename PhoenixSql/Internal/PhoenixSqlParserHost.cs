@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
@@ -238,16 +239,9 @@ namespace PhoenixSql.Internal
             }
         }
 
-        private static PhoenixSqlException HandleParseError(RpcException e)
-        {
-            if (e.Status.StatusCode == StatusCode.Aborted)
-                return new PhoenixSqlSyntaxException(e.Status.Detail);
-
-            return new PhoenixSqlHostException(e.Status.Detail);
-        }
-
         #region Static
         private static readonly object _lock = new object();
+        private static readonly Regex _syntaxErrorPositionPattern = new Regex(@"\bat line (\d+), column (\d+)\b");
 
         private static PhoenixSqlParserHost _instance;
 
@@ -262,6 +256,27 @@ namespace PhoenixSql.Internal
 
                 return _instance;
             }
+        }
+
+        private static PhoenixSqlException HandleParseError(RpcException e)
+        {
+            if (e.Status.StatusCode == StatusCode.Aborted)
+            {
+                int line = -1;
+                int column = -1;
+
+                var match = _syntaxErrorPositionPattern.Match(e.Status.Detail);
+
+                if (match.Success)
+                {
+                    line = int.Parse(match.Groups[1].Value);
+                    column = int.Parse(match.Groups[2].Value);
+                }
+
+                return new PhoenixSqlSyntaxException(line, column, e.Status.Detail);
+            }
+
+            return new PhoenixSqlHostException(e.Status.Detail);
         }
         #endregion
     }
