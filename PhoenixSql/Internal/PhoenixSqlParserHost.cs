@@ -73,7 +73,7 @@ namespace PhoenixSql.Internal
                 _status = HostStatus.Handshaking;
 
                 _handshakeTimeoutTokenSource = new CancellationTokenSource();
-                _handshakeTimeoutTokenSource.CancelAfter(TimeSpan.FromSeconds(50));
+                _handshakeTimeoutTokenSource.CancelAfter(TimeSpan.FromSeconds(5));
 
                 _handshakeTimeoutTokenRegistration = _handshakeTimeoutTokenSource.Token.Register(HandshakeTimeout);
 
