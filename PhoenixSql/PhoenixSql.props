@@ -2,6 +2,7 @@
 
     <ItemGroup>
         <None Include="$(MSBuildThisFileDirectory)..\lib\PhoenixSql.Host-1.0-SNAPSHOT-jar-with-dependencies.jar">
+            <Link>lib\PhoenixSql.Host-1.0-SNAPSHOT-jar-with-dependencies.jar</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>

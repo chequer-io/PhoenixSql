@@ -42,13 +42,8 @@
             <PackagePath>build</PackagePath>
         </None>
 
-        <None Include="..\LICENSE">
-            <Pack>True</Pack>
-        </None>
-
-        <None Include="..\Logo.png">
-            <Pack>True</Pack>
-        </None>
+        <None Include="..\LICENSE" PackagePath="" Pack="True" />
+        <None Include="..\Logo.png" PackagePath="" Pack="True" />
     </ItemGroup>
 
     <Import Project="J2NET.props"/>
