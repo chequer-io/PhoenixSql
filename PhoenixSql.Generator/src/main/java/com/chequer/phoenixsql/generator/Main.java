@@ -30,10 +30,7 @@ public class Main {
     private static ProtoFile proto;
     private static TypeTree typeTree;
 
-    private static final ProtoType udfMapEntryProtoType = new ProtoType("UDFMapEntry", null);
-
     private static final TypeInfo listTypeInfo = TypeInfo.get(List.class);
-    private static final TypeInfo mapTypeInfo = TypeInfo.get(Map.class);
     private static final TypeInfo hbasePairType = TypeInfo.get(org.apache.hadoop.hbase.util.Pair.class);
     private static final TypeInfo literalExpression = TypeInfo.get(LiteralExpression.class);
 
@@ -59,6 +56,7 @@ public class Main {
         add("org.apache.phoenix.parse.ColumnName.getFamilyName");
         add("org.apache.phoenix.parse.SelectStatement.getInnerSelectStatement");
 
+        add("org.apache.phoenix.parse.*.getUdfParseNodes");
         add("org.apache.phoenix.parse.*.has*");
         add("org.apache.phoenix.parse.*.toString");
         add("org.apache.phoenix.parse.*.getProps");
@@ -117,7 +115,6 @@ public class Main {
 
         proto.add(createPDataType());
         proto.add(createPName());
-        proto.add(createUDFMapEntry());
 
         generate();
 
@@ -155,14 +152,6 @@ public class Main {
     private static ProtoMessage createPName() {
         var message = new ProtoMessage("PName");
         message.add(new ProtoField("value", ProtoScalaType.STRING));
-        return message;
-    }
-
-    // Map<String, UDFParseNode>
-    private static ProtoMessage createUDFMapEntry() {
-        var message = new ProtoMessage("UDFMapEntry");
-        message.add(new ProtoField("key", ProtoScalaType.STRING));
-        message.add(new ProtoField("value", "UDFParseNode"));
         return message;
     }
 
@@ -539,8 +528,6 @@ public class Main {
 
                     if (needConvert) {
                         body.append(indent).append(String.format("addAll(value.%s(), NodeConverter::%s, %s::add%s);", inheritProperty.getName(), converterName, builderName, protoMethodName));
-                    } else if (inheritProperty.getName().equals("getUdfParseNodes")) {
-                        body.append(indent).append(String.format("addAll(value.getUdfParseNodes(), %s::addUdfParseNodes);", builderName));
                     } else {
                         throw new Exception();
                     }
@@ -607,16 +594,7 @@ public class Main {
                     protoField.setRepeated(true);
                 }
 
-                ProtoType protoType = null;
-
-                if (mapTypeInfo.isAssignableFrom(returnType) && property.getName().equals("getUdfParseNodes")) {
-                    protoField.setRepeated(true);
-                    protoType = udfMapEntryProtoType;
-                }
-
-                if (protoType == null) {
-                    protoType = resolveProtoType(data.absMessage, returnType);
-                }
+                ProtoType protoType = resolveProtoType(data.absMessage, returnType);
 
                 protoField.setType(protoType);
                 protoField.setName(getProtoFieldName(property));
@@ -781,9 +759,7 @@ public class Main {
 
         String name;
 
-        if (type == udfMapEntryProtoType) {
-            name = udfMapEntryProtoType.getName();
-        } else if (typeInfo.isInterface() || typeNode != null && typeNode.hasChildren()) {
+        if (typeInfo.isInterface() || typeNode != null && typeNode.hasChildren()) {
             name = "I" + typeInfo.getName();
         } else if (type != null) {
             name = csScalarTypes.getOrDefault(type.getName(), type.getName());

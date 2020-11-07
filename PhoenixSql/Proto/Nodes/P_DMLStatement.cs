@@ -8,8 +8,6 @@ namespace PhoenixSql
 
         public NamedTableNode Table => Message.Table;
 
-        public Google.Protobuf.Collections.RepeatedField<UDFMapEntry> UdfParseNodes => Message.UdfParseNodes;
-
         public IDMLStatement Message => (IDMLStatement)inherit_;
     }
 }

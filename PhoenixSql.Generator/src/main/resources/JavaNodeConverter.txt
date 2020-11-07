@@ -65,19 +65,6 @@ public class NodeConverter {
         return gson.toJson(value);
     }
 
-    private static void addAll(Map<String, UDFParseNode> udfMap, Consumer<Nodes.UDFMapEntry.Builder> add) {
-        if (udfMap == null || udfMap.isEmpty()) {
-            return;
-        }
-
-        for (final var node : udfMap.entrySet()) {
-            var entry = Nodes.UDFMapEntry.newBuilder();
-            entry.setKey(node.getKey());
-            entry.setValue(convert(node.getValue()));
-            add.accept(entry);
-        }
-    }
-
     private static <TNode, TProto> void addAll(List<TNode> source, Function<TNode, TProto> convert, Consumer<TProto> add) {
         if (source == null || source.isEmpty()) {
             return;
