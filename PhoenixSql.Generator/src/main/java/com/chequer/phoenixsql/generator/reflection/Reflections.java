@@ -6,6 +6,7 @@ import com.google.common.reflect.ClassPath;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -13,6 +14,18 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("UnstableApiUsage")
 public class Reflections {
+    public static List<String> getEnumNames(Class<?> info){
+        var names = new ArrayList<String>();
+
+        for (final var field : info.getFields()) {
+            if (Modifier.isPublic(field.getModifiers())) {
+                names.add(field.getName());
+            }
+        }
+
+        return names;
+    }
+
     public static List<ClassPath.ClassInfo> getTopLevelClasses(String packageName) throws IOException {
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 

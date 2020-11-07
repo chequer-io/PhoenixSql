@@ -30,11 +30,13 @@ public class Main {
     private static ProtoFile proto;
     private static TypeTree typeTree;
 
+    private static final TypeInfo hintNodeInfo = TypeInfo.get(HintNode.class);
     private static final TypeInfo listTypeInfo = TypeInfo.get(List.class);
     private static final TypeInfo hbasePairType = TypeInfo.get(org.apache.hadoop.hbase.util.Pair.class);
     private static final TypeInfo literalExpression = TypeInfo.get(LiteralExpression.class);
 
     private static final List<TypeInfo> additionalGenerateTypes = new ArrayList<>() {{
+        add(TypeInfo.get(HintNode.Hint.class));
         add(TypeInfo.get(PrimaryKeyConstraint.class));
         add(TypeInfo.get(TableName.class));
         add(TypeInfo.get(ColumnName.class));
@@ -357,10 +359,12 @@ public class Main {
                 var message = data.enumMessage;
 
                 var body = new StringBuilder();
-                var values = message.lastGeneratedValues;
+                var values = message.values();
+                var genValues = message.lastGeneratedValues;
 
-                for (int i = 0; i < values.size() - 1; i++) {
+                for (int i = 0; i < genValues.size() - 1; i++) {
                     var value = values.get(i);
+                    var genValue = genValues.get(i);
 
                     body.append(indent2);
 
@@ -371,11 +375,11 @@ public class Main {
                     }
 
                     body.append(String.format("(value == %s.%s) {\n", typeName, value));
-                    body.append(indent3).append(String.format("return Nodes.%s.%s;\n", message.getName(), value));
+                    body.append(indent3).append(String.format("return Nodes.%s.%s;\n", message.getName(), genValue));
                 }
 
                 body.append(indent2).append("}\n\n");
-                body.append(indent2).append(String.format("return Nodes.%s.%s;", message.getName(), values.get(values.size() - 1)));
+                body.append(indent2).append(String.format("return Nodes.%s.%s;", message.getName(), genValues.get(genValues.size() - 1)));
 
                 fragments.add(convertEnumTemplate
                         .replace("[ProtoType]", message.getName())
@@ -428,6 +432,27 @@ public class Main {
                     writeJavaGenerateFragment(typeNode, message, body, fragments, "builder", indent2);
                 } else {
                     throw new Exception();
+                }
+
+                if (data.type == hintNodeInfo) {
+                    var hintData = generateData.get(TypeInfo.get(HintNode.Hint.class));
+                    var values = hintData.enumMessage.values();
+                    var genValues = hintData.enumMessage.lastGeneratedValues;
+
+                    var template = ResourceUtil.readString("JavaHintNodeConvertBody.txt");
+                    assert template != null;
+
+                    for (int i = 0; i < values.size(); i++) {
+                        if (i > 0) {
+                            body.append("\n\n");
+                        }
+
+                        var code = template
+                                .replace("[Value]", values.get(i))
+                                .replace("[ProtoValue]", genValues.get(i));
+
+                        body.append(code);
+                    }
                 }
 
                 fragments.add(convertMessageTemplate
@@ -557,102 +582,121 @@ public class Main {
     }
 
     private static void generate(TypeTreeNode node) {
+        if (generateData.containsKey(node.typeInfo)) {
+            return;
+        }
+
         if (node.typeInfo != null) {
-            if (generateData.containsKey(node.typeInfo)) {
-                return;
-            }
-
-            var data = new GenerateData(node.typeInfo);
-            data.absMessage = new ProtoMessage(getProtoMessageName(node));
-
-            generateData.put(node.typeInfo, data);
-
-            if (!node.hasChildren()) {
-                for (final var inherit : getInheritMap(node, false)) {
-                    for (final var inheritField : inherit.inheritMembers) {
-                        data.absMessage.add(inheritField);
-                    }
-                }
-            }
-
-            var protoMembers = new ArrayList<ProtoMember>();
-            var csProperties = new ArrayList<CSharpPropertyInfo>();
-            var javaProperties = new ArrayList<MethodInfo>();
-
-            protoMembers.add(new ProtoSingLineComment(node.typeInfo.getFullName()));
-
-            for (final var property : getProperties(node.typeInfo)) {
-                var protoField = new ProtoField();
-                var returnType = property.getReturnType();
-
-                if (returnType.isArray()) {
-                    returnType = returnType.getElementType();
-                    protoField.setRepeated(true);
-                } else if (listTypeInfo.isAssignableFrom(returnType)) {
-                    var genericReturnType = TypeInfo.get((ParameterizedType) property.getGenericReturnType());
-                    returnType = genericReturnType.getGenericTypeArguments().get(0);
-                    protoField.setRepeated(true);
-                }
-
-                ProtoType protoType = resolveProtoType(data.absMessage, returnType);
-
-                protoField.setType(protoType);
-                protoField.setName(getProtoFieldName(property));
-
-                protoMembers.add(protoField);
-
-                csProperties.add(new CSharpPropertyInfo(
-                        getCSharpTypeName(returnType, protoType, protoField.isRepeated()),
-                        getCSharpPropertyName(property)));
-
-                javaProperties.add(property);
-            }
-
-            data.javaProperties = javaProperties;
-
-            if (node.hasChildren()) {
-                data.inheritMembers = protoMembers;
-
-                data.isInterface = true;
-                data.csTypeName = getCSharpTypeName(node.typeInfo, null, false);
-                data.csProperties = csProperties;
-
-                data.inheritField = new ProtoFieldOneOf();
-                data.inheritField.setName("inherit");
-
-                data.absMessage.add(data.inheritField);
+            if (node.typeInfo.isEnum()) {
+                generateGlobalEnum(node.typeInfo);
             } else {
-                data.csTypeName = data.absMessage.getName();
+                var data = new GenerateData(node.typeInfo);
+                data.absMessage = new ProtoMessage(getProtoMessageName(node));
 
-                for (final var protoField : protoMembers) {
-                    data.absMessage.add(protoField);
-                }
+                generateData.put(node.typeInfo, data);
 
-                for (final var inheritData : getInheritMap(node, false)) {
-                    var protoField = new ProtoField();
-                    protoField.setType(new ProtoType(data.absMessage.getName(), null));
-                    protoField.setName(data.absMessage.getName());
-
-                    inheritData.inheritField.fields().add(protoField);
-                }
-            }
-
-            proto.add(data.absMessage);
-
-            // --
-
-            if (node.hasChildren() && !node.typeInfo.isAbstract()) {
-                data.message = new ProtoMessage(node.typeInfo.getName());
-
-                for (final var inheritData : getInheritMap(node, true)) {
-                    for (final var inheritMember : inheritData.inheritMembers) {
-                        data.message.add(inheritMember);
+                if (!node.hasChildren()) {
+                    for (final var inherit : getInheritMap(node, false)) {
+                        for (final var inheritField : inherit.inheritMembers) {
+                            data.absMessage.add(inheritField);
+                        }
                     }
                 }
 
-                data.inheritField.fields().add(new ProtoField(data.message.getName(), new ProtoType(data.message.getName(), null)));
+                var protoMembers = new ArrayList<ProtoMember>();
+                var csProperties = new ArrayList<CSharpPropertyInfo>();
+                var javaProperties = new ArrayList<MethodInfo>();
 
-                proto.add(data.message);
+                protoMembers.add(new ProtoSingLineComment(node.typeInfo.getFullName()));
+
+                for (final var property : getProperties(node.typeInfo)) {
+                    var protoField = new ProtoField();
+                    var returnType = property.getReturnType();
+
+                    if (returnType.isArray()) {
+                        returnType = returnType.getElementType();
+                        protoField.setRepeated(true);
+                    } else if (listTypeInfo.isAssignableFrom(returnType)) {
+                        var genericReturnType = TypeInfo.get((ParameterizedType) property.getGenericReturnType());
+                        returnType = genericReturnType.getGenericTypeArguments().get(0);
+                        protoField.setRepeated(true);
+                    }
+
+                    ProtoType protoType = resolveProtoType(data.absMessage, returnType);
+
+                    protoField.setType(protoType);
+                    protoField.setName(getProtoFieldName(property));
+
+                    protoMembers.add(protoField);
+
+                    csProperties.add(new CSharpPropertyInfo(
+                            getCSharpTypeName(returnType, protoType, protoField.isRepeated()),
+                            getCSharpPropertyName(property)));
+
+                    javaProperties.add(property);
+                }
+
+                if (node.typeInfo == hintNodeInfo) {
+                    var hintEntry = new ProtoMessage("Entry");
+                    hintEntry.add(new ProtoField("key", "Hint"));
+                    hintEntry.add(new ProtoField("value", ProtoScalaType.STRING));
+
+                    protoMembers.add(0, hintEntry);
+
+                    var protoField = new ProtoField();
+                    protoField.setRepeated(true);
+                    protoField.setType(new ProtoType(hintEntry.getName(), null));
+                    protoField.setName("hints");
+
+                    protoMembers.add(protoField);
+                }
+
+                data.javaProperties = javaProperties;
+
+                if (node.hasChildren()) {
+                    data.inheritMembers = protoMembers;
+
+                    data.isInterface = true;
+                    data.csTypeName = getCSharpTypeName(node.typeInfo, null, false);
+                    data.csProperties = csProperties;
+
+                    data.inheritField = new ProtoFieldOneOf();
+                    data.inheritField.setName("inherit");
+
+                    data.absMessage.add(data.inheritField);
+                } else {
+                    data.csTypeName = data.absMessage.getName();
+
+                    for (final var protoField : protoMembers) {
+                        data.absMessage.add(protoField);
+                    }
+
+                    for (final var inheritData : getInheritMap(node, false)) {
+                        var protoField = new ProtoField();
+                        protoField.setType(new ProtoType(data.absMessage.getName(), null));
+                        protoField.setName(data.absMessage.getName());
+
+                        inheritData.inheritField.fields().add(protoField);
+                    }
+                }
+
+                proto.add(data.absMessage);
+
+                // --
+
+                if (node.hasChildren() && !node.typeInfo.isAbstract()) {
+                    data.message = new ProtoMessage(node.typeInfo.getName());
+
+                    for (final var inheritData : getInheritMap(node, true)) {
+                        for (final var inheritMember : inheritData.inheritMembers) {
+                            data.message.add(inheritMember);
+                        }
+                    }
+
+                    data.inheritField.fields().add(new ProtoField(data.message.getName(), new ProtoType(data.message.getName(), null)));
+
+                    proto.add(data.message);
+                }
             }
         }
 
@@ -718,10 +762,8 @@ public class Main {
         var data = new GenerateData(enumType);
         data.enumMessage = new ProtoEnum(enumType.getName());
 
-        for (final var field : enumType.unwrap().getFields()) {
-            if (Modifier.isPublic(field.getModifiers())) {
-                data.enumMessage.values().add(field.getName());
-            }
+        for (final var name : Reflections.getEnumNames(enumType.unwrap())) {
+            data.enumMessage.values().add(name);
         }
 
         generateData.put(enumType, data);

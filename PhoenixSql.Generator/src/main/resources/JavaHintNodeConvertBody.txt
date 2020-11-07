@@ -1,0 +1,5 @@
+        if (value.hasHint(HintNode.Hint.[Value])) {
+            builder.addHintsBuilder()
+                    .setKey(Nodes.Hint.[ProtoValue])
+                    .setValue(value.getHint(HintNode.Hint.[Value]));
+        }
