@@ -6,14 +6,14 @@
     </PropertyGroup>
 
     <PropertyGroup Label="Nuspec">
-        <Description>Phoenix sql parser for .NET using phoenix-core.jar</Description>
+        <Description>Phoenix sql parser for .NET using phoenix-core 5.0.0-HBase-2.0</Description>
         <Authors>CHEQUER</Authors>
         <Company>CHEQUER</Company>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <RepositoryUrl>https://github.com/chequer-io/PhoenixSql</RepositoryUrl>
         <PackageProjectUrl>https://github.com/chequer-io/PhoenixSql</PackageProjectUrl>
         <PackageIcon>Logo.png</PackageIcon>
-        <Version>1.0.2</Version>
+        <Version>1.0.3</Version>
     </PropertyGroup>
 
     <ItemGroup>
