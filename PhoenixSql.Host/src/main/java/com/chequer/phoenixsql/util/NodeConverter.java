@@ -706,7 +706,7 @@ public class NodeConverter {
         var v1 = value.getTable();
         if (v1 != null) builder.setTable(convert(v1));
         var v2 = value.getHint();
-        if (v2 != null) builder.setHint(convert(v2));
+        if (v2 != null && !v2.isEmpty()) builder.setHint(convert(v2));
         var v3 = value.getLimit();
         if (v3 != null) builder.setLimit(convert(v3));
         var v4 = value.getOffset();
@@ -1087,7 +1087,7 @@ public class NodeConverter {
         var v0 = value.getOperation();
         if (v0 != null) builder.setOperation(convert(v0));
         var v1 = value.getHint();
-        if (v1 != null) builder.setHint(convert(v1));
+        if (v1 != null && !v1.isEmpty()) builder.setHint(convert(v1));
         var v2 = value.getLimit();
         if (v2 != null) builder.setLimit(convert(v2));
         var v3 = value.getOffset();
@@ -2027,7 +2027,7 @@ public class NodeConverter {
         if (v1 != null) builder.setTable(convert(v1));
         addAll(value.getColumns(), NodeConverter::convert, builder::addColumns);
         var v2 = value.getHint();
-        if (v2 != null) builder.setHint(convert(v2));
+        if (v2 != null && !v2.isEmpty()) builder.setHint(convert(v2));
         addAll(value.getOnDupKeyPairs(), NodeConverter::convertPairColumnNameParseNode, builder::addOnDupKeyPairs);
         var v3 = value.getSelect();
         if (v3 != null) builder.setSelect(convert(v3));

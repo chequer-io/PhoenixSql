@@ -556,6 +556,11 @@ public class Main {
                     } else {
                         throw new Exception();
                     }
+                } else if (returnType == TypeInfo.get(HintNode.class)) {
+                    var variableName = "v" + ++variable;
+
+                    body.append(indent).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
+                    body.append(indent).append(String.format("if (%s != null && !%s.isEmpty()) %s.set%s(convert(%s));", variableName, variableName, builderName, protoMethodName, variableName));
                 } else if (toRpcConvertTypes.contains(returnType.unwrap()) || generateData.containsKey(returnType)) {
                     var variableName = "v" + ++variable;
 
