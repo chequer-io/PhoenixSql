@@ -13,7 +13,7 @@
         <RepositoryUrl>https://github.com/chequer-io/PhoenixSql</RepositoryUrl>
         <PackageProjectUrl>https://github.com/chequer-io/PhoenixSql</PackageProjectUrl>
         <PackageIcon>Logo.png</PackageIcon>
-        <Version>1.0.4</Version>
+        <Version>1.0.5</Version>
     </PropertyGroup>
 
     <ItemGroup>
