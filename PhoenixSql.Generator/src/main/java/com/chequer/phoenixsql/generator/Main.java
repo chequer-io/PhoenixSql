@@ -5,6 +5,8 @@ import com.chequer.phoenixsql.generator.reflection.*;
 import com.chequer.phoenixsql.generator.util.IterableUtil;
 import com.chequer.phoenixsql.generator.util.ResourceUtil;
 import com.chequer.phoenixsql.generator.util.StringUtil;
+import org.apache.hadoop.hbase.util.Pair;
+import org.apache.hadoop.hbase.util.SortedList;
 import org.apache.phoenix.expression.LiteralExpression;
 import org.apache.phoenix.parse.*;
 import org.apache.phoenix.schema.PName;
@@ -387,16 +389,31 @@ public class Main {
                         .replace("[Body]", body.toString()));
             } else {
                 var message = data.absMessage;
-                boolean hasDefault = data.message != null;
+                boolean hasFallback = data.message != null;
 
                 var body = new StringBuilder();
 
                 if (data.isInterface) {
                     var fields = data.inheritField.fields();
+                    var defaultFields = new ArrayList<Pair<ProtoField, Integer>>();
                     boolean write = false;
 
-                    for (int i = hasDefault ? 1 : 0; i < fields.size(); i++) {
+                    for (int i = hasFallback ? 1 : 0; i < fields.size(); i++) {
                         var field = fields.get(i);
+
+                        var defaultData = data.convertDefaultFields.getOrDefault(field, null);
+
+                        if (defaultData != null) {
+                            int distance = getInheritDistance(defaultData.type, data.type);
+                            assert distance >= 0;
+
+                            if (defaultData.type == TypeInfo.get(AggregateFunctionParseNode.class)) {
+                                System.out.println("AggregateFunctionParseNode");
+                            }
+                            defaultFields.add(new Pair<>(field, distance));
+
+                            continue;
+                        }
 
                         body.append(indent2);
 
@@ -411,22 +428,37 @@ public class Main {
                         body.append(indent3).append(String.format("builder.set%s(convert((%s) value));\n", field.getName(), field.getName()));
                     }
 
+                    defaultFields.sort(Collections.reverseOrder(Comparator.comparing(Pair::getSecond)));
+
+                    for (final var pair : defaultFields) {
+                        var field = pair.getFirst();
+
+                        body.append(indent2);
+
+                        if (!write) {
+                            body.append("if ");
+                            write = true;
+                        } else {
+                            body.append("} else if ");
+                        }
+
+                        body.append(String.format("(value instanceof %s) {\n", field.getName()));
+                        body.append(indent3).append(String.format("builder.set%s(convertDefault((%s) value));\n", field.getName(), field.getName()));
+                    }
+
                     if (write) {
                         body.append(indent2).append("}");
                     }
 
-                    if (hasDefault) {
-                        if (write) {
-                            body.append(" else {\n");
-                        }
+                    if (hasFallback) {
+                        var fallbackBody = new StringBuilder();
+                        writeJavaGenerateFragment(typeNode, data.message, fallbackBody, fragments, "builder", indent2);
 
-                        body.append(indent3).append(String.format("var defBuilder = Nodes.%s.newBuilder();\n\n", data.message.getName()));
-
-                        writeJavaGenerateFragment(typeNode, data.message, body, fragments, "defBuilder", indent3);
-                        body.append("\n\n");
-
-                        body.append(indent3).append(String.format("builder.set%s(defBuilder);\n", data.message.getName()));
-                        body.append(indent2).append("}");
+                        fragments.add(convertMessageTemplate
+                                .replace("[Name]", "convertDefault")
+                                .replace("[ProtoType]", data.message.getName())
+                                .replace("[Type]", data.type.getName())
+                                .replace("[Body]", fallbackBody.toString()));
                     }
                 } else if (typeNode != null) {
                     writeJavaGenerateFragment(typeNode, message, body, fragments, "builder", indent2);
@@ -692,13 +724,16 @@ public class Main {
                 if (node.hasChildren() && !node.typeInfo.isAbstract()) {
                     data.message = new ProtoMessage(node.typeInfo.getName());
 
+                    var field = new ProtoField(data.message.getName(), new ProtoType(data.message.getName(), null));
+
                     for (final var inheritData : getInheritMap(node, true)) {
                         for (final var inheritMember : inheritData.inheritMembers) {
                             data.message.add(inheritMember);
                         }
-                    }
 
-                    data.inheritField.fields().add(new ProtoField(data.message.getName(), new ProtoType(data.message.getName(), null)));
+                        inheritData.inheritField.fields().add(field);
+                        inheritData.convertDefaultFields.put(field, data);
+                    }
 
                     proto.add(data.message);
                 }
@@ -870,6 +905,21 @@ public class Main {
         return properties;
     }
 
+    private static int getInheritDistance(TypeInfo type, TypeInfo baseType) {
+        int distance = 0;
+
+        while (type != null && type.getBaseType() != null) {
+            if (type == baseType) {
+                return distance;
+            }
+
+            distance++;
+            type = type.getBaseType();
+        }
+
+        return -1;
+    }
+
     private static List<GenerateData> getInheritMap(TypeTreeNode node, boolean withSelf) {
         if (node == null) {
             return null;
@@ -908,6 +958,8 @@ public class Main {
         public String csTypeName;
         public List<CSharpPropertyInfo> csProperties;
         public List<MethodInfo> javaProperties;
+
+        public final Map<ProtoField, GenerateData> convertDefaultFields = new HashMap<>();
 
         public GenerateData(TypeInfo type) {
             this.type = type;
