@@ -12,8 +12,7 @@ import org.apache.phoenix.expression.LiteralExpression;
 import org.apache.phoenix.parse.*;
 import org.apache.phoenix.schema.PName;
 import org.apache.phoenix.schema.PTableKey;
-import org.apache.phoenix.schema.types.PDataType;
-import org.apache.phoenix.schema.types.PDataTypeFactory;
+import org.apache.phoenix.schema.types.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -640,6 +639,11 @@ public class Main {
 
                     body.append(indent).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
                     body.append(indent).append(String.format("if (%s != null && !%s.isEmpty()) %s.set%s(convert(%s));", variableName, variableName, builderName, protoMethodName, variableName));
+                } else if (returnType == TypeInfo.get(Object.class) && inheritData.type == TypeInfo.get(LiteralParseNode.class)) {
+                    var variableName = "v" + ++variable;
+                    body.append(indent).append(String.format("var %s = new StringBuilder();\n", variableName));
+                    body.append(indent).append(String.format("value.toSQL(null, %s);\n", variableName));
+                    body.append(indent).append(String.format("%s.set%s(%s.toString());", builderName, protoMethodName, variableName));
                 } else if (toRpcConvertTypes.contains(returnType.unwrap()) || generateData.containsKey(returnType)) {
                     var variableName = "v" + ++variable;
 

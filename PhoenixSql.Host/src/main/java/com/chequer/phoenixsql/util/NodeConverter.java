@@ -2857,8 +2857,9 @@ public class NodeConverter {
         builder.setIsStateless(value.isStateless());
         var v1 = value.getType();
         if (v1 != null) builder.setType(convert(v1));
-        var v2 = value.getValue();
-        if (v2 != null) builder.setValue(convert(v2));
+        var v2 = new StringBuilder();
+        value.toSQL(null, v2);
+        builder.setValue(v2.toString());
 
         return builder;
     }
