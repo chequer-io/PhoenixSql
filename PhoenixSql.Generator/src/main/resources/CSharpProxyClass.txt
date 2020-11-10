@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class [ProtoType] : IProxyMessage<I[Type]>, I[Type]
+    public partial class [ProtoType] : IPhoenixProxyNode<I[Type]>, I[Type]
     {
 [Body]
     }

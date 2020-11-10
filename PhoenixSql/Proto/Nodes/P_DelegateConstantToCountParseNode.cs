@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class P_DelegateConstantToCountParseNode : IProxyMessage<IDelegateConstantToCountParseNode>, IDelegateConstantToCountParseNode
+    public partial class P_DelegateConstantToCountParseNode : IPhoenixProxyNode<IDelegateConstantToCountParseNode>, IDelegateConstantToCountParseNode
     {
         public string Alias => Message.Alias;
 

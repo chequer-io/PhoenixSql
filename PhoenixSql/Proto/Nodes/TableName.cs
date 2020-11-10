@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class TableName
+    public partial class TableName : IPhoenixNode
     {
     }
 }

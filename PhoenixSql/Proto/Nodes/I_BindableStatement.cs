@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class I_BindableStatement : IProxyMessage<IBindableStatement>, IBindableStatement
+    public partial class I_BindableStatement : IPhoenixProxyNode<IBindableStatement>, IBindableStatement
     {
         public int BindCount => Message.BindCount;
 

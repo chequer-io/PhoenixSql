@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class PFunction
+    public partial class PFunction : IPhoenixNode
     {
     }
 }

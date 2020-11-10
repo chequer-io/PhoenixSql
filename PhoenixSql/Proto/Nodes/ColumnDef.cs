@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class ColumnDef
+    public partial class ColumnDef : IPhoenixNode
     {
     }
 }

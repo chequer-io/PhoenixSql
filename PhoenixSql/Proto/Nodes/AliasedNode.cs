@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class AliasedNode
+    public partial class AliasedNode : IPhoenixNode
     {
     }
 }

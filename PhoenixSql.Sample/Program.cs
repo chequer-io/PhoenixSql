@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
+using PhoenixSql.Extensions;
 
 namespace PhoenixSql.Sample
 {
@@ -29,8 +31,11 @@ namespace PhoenixSql.Sample
                     var statement = PhoenixSqlParser.Parse(sql);
                     sw.Stop();
 
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine($"Deparse : {PhoenixSqlDeparser.Deparse(statement)}");
+
                     Console.ForegroundColor = ConsoleColor.Magenta;
-                    Console.WriteLine($"parsed in {sw.Elapsed.TotalMilliseconds:0.00} ms");
+                    Console.WriteLine($"Parsed in {sw.Elapsed.TotalMilliseconds:0.00} ms");
 
                     Console.WriteLine();
 
@@ -46,13 +51,10 @@ namespace PhoenixSql.Sample
             }
         }
 
-        private static void Print(string key, object node, int depth = 0)
+        private static void Print(string key, object v, int depth = 0)
         {
-            if (node is IProxyMessage<object> abstractMessage)
-            {
-                Print(key, abstractMessage.Message, depth);
-                return;
-            }
+            if (v is IPhoenixNode node)
+                v = node.Unwrap();
 
             if (depth > 0)
                 Console.Write(new string(' ', depth * 4));
@@ -63,19 +65,19 @@ namespace PhoenixSql.Sample
                 Console.Write($"{key}: ");
             }
 
-            if (node is IMessage)
+            if (v is IMessage)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine(node.GetType().Name);
+                Console.WriteLine(v.GetType().Name);
 
-                foreach (var propertyInfo in node.GetType().GetProperties().Where(p => !p.GetMethod!.IsStatic))
+                foreach (var propertyInfo in v.GetType().GetProperties().Where(p => !p.GetMethod!.IsStatic))
                 {
                     if (propertyInfo.DeclaringType.IsInterface)
                         continue;
 
-                    var value = propertyInfo.GetValue(node);
+                    var value = propertyInfo.GetValue(v);
 
-                    if (!(value is string) && value is IEnumerable enumerable)
+                    if (!(value is string) && value is IEnumerable<IPhoenixNode> enumerable)
                     {
                         int index = 0;
 
@@ -110,7 +112,7 @@ namespace PhoenixSql.Sample
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(node);
+                Console.WriteLine(v);
             }
         }
     }

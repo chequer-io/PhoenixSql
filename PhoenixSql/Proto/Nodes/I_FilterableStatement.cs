@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class I_FilterableStatement : IProxyMessage<IFilterableStatement>, IFilterableStatement
+    public partial class I_FilterableStatement : IPhoenixProxyNode<IFilterableStatement>, IFilterableStatement
     {
         public int BindCount => Message.BindCount;
 

@@ -23,6 +23,13 @@ namespace PhoenixSql
         }
     }
 
+    public sealed class PhoenixSqlDeparserException : PhoenixSqlException
+    {
+        internal PhoenixSqlDeparserException(IPhoenixNode node) : base($"Deparser not support {node.GetType().Name} node.")
+        {
+        }
+    }
+    
     public sealed class PhoenixSqlSyntaxException : PhoenixSqlException
     {
         public int Line { get; }

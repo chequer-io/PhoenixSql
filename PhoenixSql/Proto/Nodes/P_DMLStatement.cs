@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class P_DMLStatement : IProxyMessage<IDMLStatement>, IDMLStatement
+    public partial class P_DMLStatement : IPhoenixProxyNode<IDMLStatement>, IDMLStatement
     {
         public int BindCount => Message.BindCount;
 

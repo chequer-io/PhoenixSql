@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class P_ArithmeticParseNode : IProxyMessage<IArithmeticParseNode>, IArithmeticParseNode
+    public partial class P_ArithmeticParseNode : IPhoenixProxyNode<IArithmeticParseNode>, IArithmeticParseNode
     {
         public string Alias => Message.Alias;
 

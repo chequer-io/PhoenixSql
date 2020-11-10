@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class OrderByNode
+    public partial class OrderByNode : IPhoenixNode
     {
     }
 }

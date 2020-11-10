@@ -135,6 +135,7 @@ public class Main {
         writer.close();
 
         writeJava();
+        writeCSharpPName();
         writeCSharpInterfaces();
         writeCSharpTypeUtility();
     }
@@ -169,6 +170,16 @@ public class Main {
         typeTree = TypeTree.build(types, Main::isPhoenixType);
 
         generate(typeTree.root);
+    }
+
+    private static void writeCSharpPName() throws IOException {
+        final var code = ResourceUtil.readString("CSharpPName.txt");
+        assert code != null;
+
+        var file = new File(rootDir, "PhoenixSql/Proto/Nodes/PName.cs");
+        var writer = new FileWriter(file);
+        writer.write(code);
+        writer.close();
     }
 
     private static void writeCSharpInterfaces() throws IOException {
@@ -210,10 +221,12 @@ public class Main {
                 writeCSharpProxyClass(data);
 
                 csWriter.write(String.format("    public interface %s", data.csTypeName));
+                csWriter.write(" : ");
 
                 if (extended) {
-                    csWriter.write(" : ");
                     csWriter.write(inheritMap.get(inheritMap.size() - 1).csTypeName);
+                } else {
+                    csWriter.write("IPhoenixNode");
                 }
 
                 csWriter.write('\n');
@@ -239,11 +252,12 @@ public class Main {
 
                 csWriter.write("    }\n");
             } else {
-                csWriter.write(String.format("    public partial class %s", data.csTypeName));
+                csWriter.write(String.format("    public partial class %s : ", data.csTypeName));
 
                 if (extended) {
-                    csWriter.write(" : ");
                     csWriter.write(inheritMap.get(inheritMap.size() - 1).csTypeName);
+                } else {
+                    csWriter.write("IPhoenixNode");
                 }
 
                 csWriter.write('\n');

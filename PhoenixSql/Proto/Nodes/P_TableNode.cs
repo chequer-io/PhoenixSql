@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class P_TableNode : IProxyMessage<ITableNode>, ITableNode
+    public partial class P_TableNode : IPhoenixProxyNode<ITableNode>, ITableNode
     {
         public string Alias => Message.Alias;
 

@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class OffsetNode
+    public partial class OffsetNode : IPhoenixNode
     {
     }
 }

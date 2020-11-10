@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public interface ITableNode
+    public interface ITableNode : IPhoenixNode
     {
         string Alias { get; }
     }

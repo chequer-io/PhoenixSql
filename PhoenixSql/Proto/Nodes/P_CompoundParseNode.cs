@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class P_CompoundParseNode : IProxyMessage<ICompoundParseNode>, ICompoundParseNode
+    public partial class P_CompoundParseNode : IPhoenixProxyNode<ICompoundParseNode>, ICompoundParseNode
     {
         public string Alias => Message.Alias;
 

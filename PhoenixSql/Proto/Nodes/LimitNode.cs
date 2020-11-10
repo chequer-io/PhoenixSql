@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class LimitNode
+    public partial class LimitNode : IPhoenixNode
     {
     }
 }

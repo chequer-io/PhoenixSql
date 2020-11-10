@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public interface IBindableStatement
+    public interface IBindableStatement : IPhoenixNode
     {
         int BindCount { get; }
 

@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class CursorName
+    public partial class CursorName : IPhoenixNode
     {
     }
 }

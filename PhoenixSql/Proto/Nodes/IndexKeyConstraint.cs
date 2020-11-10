@@ -1,6 +1,6 @@
 namespace PhoenixSql
 {
-    public partial class IndexKeyConstraint
+    public partial class IndexKeyConstraint : IPhoenixNode
     {
     }
 }
