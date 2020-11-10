@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using PhoenixSql.Extensions;
 using PhoenixSql.Internal;
 using PhoenixSql.Utilities;
@@ -10,6 +11,8 @@ namespace PhoenixSql
 {
     public static class PhoenixSqlDeparser
     {
+        private static readonly Regex _namePattern = new Regex(@"^[A-Z_][A-Z\d_]*$");
+
         public static string Deparse(IPhoenixNode node)
         {
             var writer = new ScriptWriter();
@@ -703,6 +706,7 @@ namespace PhoenixSql
             {
                 writer.WriteSpace();
                 writer.Write(node.Alias);
+                WriteAlias(writer, node.Alias);
             }
         }
         #endregion
@@ -1502,6 +1506,11 @@ namespace PhoenixSql
 
             if (caseSensitive)
                 writer.Write('"');
+        }
+
+        private static void WriteAlias(ScriptWriter writer, string alias)
+        {
+            WriteIdentifier(writer, alias, !_namePattern.IsMatch(alias));
         }
 
         // (2)
