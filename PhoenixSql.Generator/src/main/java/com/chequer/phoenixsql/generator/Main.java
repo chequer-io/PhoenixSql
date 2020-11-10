@@ -5,6 +5,7 @@ import com.chequer.phoenixsql.generator.reflection.*;
 import com.chequer.phoenixsql.generator.util.IterableUtil;
 import com.chequer.phoenixsql.generator.util.ResourceUtil;
 import com.chequer.phoenixsql.generator.util.StringUtil;
+import com.google.common.reflect.ClassPath;
 import org.apache.hadoop.hbase.util.Pair;
 import org.apache.hadoop.hbase.util.SortedList;
 import org.apache.phoenix.expression.LiteralExpression;
@@ -12,6 +13,7 @@ import org.apache.phoenix.parse.*;
 import org.apache.phoenix.schema.PName;
 import org.apache.phoenix.schema.PTableKey;
 import org.apache.phoenix.schema.types.PDataType;
+import org.apache.phoenix.schema.types.PDataTypeFactory;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -20,6 +22,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -103,6 +106,7 @@ public class Main {
     private static final String indent1 = "    ";
     private static final String indent2 = "        ";
     private static final String indent3 = "            ";
+    private static final String indent4 = "                ";
 
     private static final Map<TypeInfo, GenerateData> generateData = new HashMap<>();
 
@@ -117,8 +121,8 @@ public class Main {
         proto.options().put("csharp_namespace", "PhoenixSql");
         proto.options().put("java_package", "com.chequer.phoenixsql.proto");
 
-        proto.add(createPDataType());
-        proto.add(createPName());
+        createPDataType();
+        createPName();
 
         generate();
 
@@ -133,30 +137,23 @@ public class Main {
 
         writeJava();
         writeCSharpInterfaces();
+        writeCSharpTypeUtility();
     }
 
-    private static ProtoEnum createPDataType() {
+    private static void createPDataType() {
         var protoEnum = new ProtoEnum("PDataType");
-        var values = protoEnum.values();
-        values.add("PUnsignedDate");
-        values.add("PArrayDataType");
-        values.add("PBinaryBase");
-        values.add("PBoolean");
-        values.add("PChar");
-        values.add("PDate");
-        values.add("PNumericType");
-        values.add("PTime");
-        values.add("PTimestamp");
-        values.add("PUnsignedTime");
-        values.add("PVarchar");
 
-        return protoEnum;
+        for (final var type : PDataTypeFactory.getInstance().getTypes()) {
+            protoEnum.values().add(type.getClass().getSimpleName().substring(1));
+        }
+
+        proto.add(protoEnum);
     }
 
-    private static ProtoMessage createPName() {
+    private static void createPName() {
         var message = new ProtoMessage("PName");
         message.add(new ProtoField("value", ProtoScalaType.STRING));
-        return message;
+        proto.add(message);
     }
 
     private static void generate() throws Exception {
@@ -274,6 +271,33 @@ public class Main {
 
             csWriter.close();
         }
+    }
+
+    private static void writeCSharpTypeUtility() throws IOException {
+        final var template = ResourceUtil.readString("CSharpTypeUtility.txt");
+        assert template != null;
+
+        var body = new StringBuilder();
+        var types = PDataTypeFactory.getInstance().getOrderedTypes();
+
+        for (int i = 0; i < types.length; i++) {
+            var name = types[i].getClass().getSimpleName().substring(1);
+            var typeName = types[i].getSqlTypeName();
+
+            if (i > 0) {
+                body.append(",\n");
+            }
+
+            body.append(indent4);
+            body.append(String.format("[PDataType.%s] = \"%s\"", name, typeName));
+        }
+
+        var code = template.replace("[Body]", body.toString());
+
+        var file = new File(rootDir, "PhoenixSql/Utilities/PhoenixDataTypeUtility.cs");
+        var writer = new FileWriter(file);
+        writer.write(code);
+        writer.close();
     }
 
     private static void writeCSharpClass(GenerateData data) throws IOException {
@@ -503,7 +527,30 @@ public class Main {
             }
         }
 
-        var code = converterTemplate.replace("[Body]", converterBody.toString());
+        final var dataTypeBody = new StringBuilder();
+
+        var dataTypes = PDataTypeFactory.getInstance().getOrderedTypes();
+
+        for (int i = dataTypes.length - 1; i >= 1; i--) {
+            final var name = dataTypes[i].getClass().getSimpleName().substring(1);
+
+            if (i == dataTypes.length - 1) {
+                dataTypeBody.append(indent2).append("if ");
+            } else {
+                dataTypeBody.append(indent2).append("} else if ");
+            }
+
+            dataTypeBody.append(String.format("(value instanceof %s) {\n", dataTypes[i].getClass().getSimpleName()));
+            dataTypeBody.append(indent3).append(String.format("return Nodes.PDataType.%s;\n", name));
+        }
+
+        dataTypeBody.append(indent2).append("}\n\n");
+        dataTypeBody.append(indent2);
+        dataTypeBody.append(String.format("return Nodes.PDataType.%s;\n", dataTypes[0].getClass().getSimpleName().substring(1)));
+
+        var code = converterTemplate
+                .replace("[Body]", converterBody.toString())
+                .replace("[PDataTypeBody]", dataTypeBody.toString());
 
         var converterFile = new File(rootDir, "PhoenixSql.Host\\src\\main\\java\\com\\chequer\\phoenixsql\\util\\NodeConverter.java");
         var javaWriter = new FileWriter(converterFile);

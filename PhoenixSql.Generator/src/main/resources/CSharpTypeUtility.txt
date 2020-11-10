@@ -1,0 +1,18 @@
+using System.Collections.Generic;
+
+namespace PhoenixSql.Utilities
+{
+    public static class PhoenixDataTypeUtility
+    {
+        private static readonly Dictionary<PDataType, string> _typeNames =
+            new Dictionary<PDataType, string>
+            {
+[Body]
+            };
+
+        public static string GetSqlTypeName(PDataType type)
+        {
+            return _typeNames[type];
+        }
+    }
+}

@@ -12,7 +12,6 @@ import org.apache.phoenix.schema.*;
 import org.apache.phoenix.schema.types.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -26,30 +25,7 @@ public class NodeConverter {
     }
 
     private static Nodes.PDataType convert(PDataType<?> value) {
-        if (value instanceof PUnsignedDate) {
-            return Nodes.PDataType.PUnsignedDate;
-        } else if (value instanceof PArrayDataType) {
-            return Nodes.PDataType.PArrayDataType;
-        } else if (value instanceof PBinaryBase) {
-            return Nodes.PDataType.PBinaryBase;
-        } else if (value instanceof PBoolean) {
-            return Nodes.PDataType.PBoolean;
-        } else if (value instanceof PChar) {
-            return Nodes.PDataType.PChar;
-        } else if (value instanceof PDate) {
-            return Nodes.PDataType.PDate;
-        } else if (value instanceof PNumericType) {
-            return Nodes.PDataType.PNumericType;
-        } else if (value instanceof PTime) {
-            return Nodes.PDataType.PTime;
-        } else if (value instanceof PTimestamp) {
-            return Nodes.PDataType.PTimestamp;
-        } else if (value instanceof PUnsignedTime) {
-            return Nodes.PDataType.PUnsignedTime;
-        }
-
-        // PVarchar
-        return Nodes.PDataType.PVarchar;
+[PDataTypeBody]
     }
 
     private static Nodes.PName.Builder convert(PName value) {

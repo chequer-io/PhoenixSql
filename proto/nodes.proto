@@ -5,6 +5,15 @@ package proto;
 option csharp_namespace = "PhoenixSql";
 option java_package = "com.chequer.phoenixsql.proto";
 
+enum JoinType {
+    Inner = 0;
+    Left = 1;
+    Right = 2;
+    Full = 3;
+    Semi = 4;
+    Anti = 5;
+}
+
 enum Op {
     NEXT_VALUE = 0;
     CURRENT_VALUE = 1;
@@ -25,33 +34,12 @@ enum CompareOp {
     NO_OP = 6;
 }
 
-enum JoinType {
-    Inner = 0;
-    Left = 1;
-    Right = 2;
-    Full = 3;
-    Semi = 4;
-    Anti = 5;
-}
-
 enum Action {
     READ = 0;
     WRITE = 1;
     EXEC = 2;
     CREATE = 3;
     ADMIN = 4;
-}
-
-enum PIndexState {
-    BUILDING = 0;
-    USABLE = 1;
-    UNUSABLE = 2;
-    ACTIVE = 3;
-    INACTIVE = 4;
-    DISABLE = 5;
-    REBUILD = 6;
-    PENDING_ACTIVE = 7;
-    PENDING_DISABLE = 8;
 }
 
 enum IndexType {
@@ -66,6 +54,18 @@ enum PTableType {
     INDEX = 3;
     PROJECTED = 4;
     SUBQUERY = 5;
+}
+
+enum PIndexState {
+    BUILDING = 0;
+    USABLE = 1;
+    UNUSABLE = 2;
+    ACTIVE = 3;
+    INACTIVE = 4;
+    DISABLE = 5;
+    REBUILD = 6;
+    PENDING_ACTIVE = 7;
+    PENDING_DISABLE = 8;
 }
 
 enum Operation {
@@ -100,28 +100,58 @@ enum Hint {
 }
 
 enum PDataType {
-    PUnsignedDate = 0;
-    PArrayDataType = 1;
-    PBinaryBase = 2;
-    PBoolean = 3;
-    PChar = 4;
-    PDate = 5;
-    PNumericType = 6;
-    PTime = 7;
-    PTimestamp = 8;
-    PUnsignedTime = 9;
-    PVarchar = 10;
+    Varchar = 0;
+    Char = 1;
+    Long = 2;
+    Integer = 3;
+    Smallint = 4;
+    Tinyint = 5;
+    Float = 6;
+    Double = 7;
+    Decimal = 8;
+    Timestamp = 9;
+    Time = 10;
+    Date = 11;
+    UnsignedTimestamp = 12;
+    UnsignedTime = 13;
+    UnsignedDate = 14;
+    UnsignedLong = 15;
+    UnsignedInt = 16;
+    UnsignedSmallint = 17;
+    UnsignedTinyint = 18;
+    UnsignedFloat = 19;
+    UnsignedDouble = 20;
+    Boolean = 21;
+    Varbinary = 22;
+    Binary = 23;
+    IntegerArray = 24;
+    BooleanArray = 25;
+    VarcharArray = 26;
+    VarbinaryArray = 27;
+    BinaryArray = 28;
+    CharArray = 29;
+    LongArray = 30;
+    SmallintArray = 31;
+    TinyintArray = 32;
+    FloatArray = 33;
+    DoubleArray = 34;
+    DecimalArray = 35;
+    TimestampArray = 36;
+    UnsignedTimestampArray = 37;
+    TimeArray = 38;
+    UnsignedTimeArray = 39;
+    DateArray = 40;
+    UnsignedDateArray = 41;
+    UnsignedLongArray = 42;
+    UnsignedIntArray = 43;
+    UnsignedSmallintArray = 44;
+    UnsignedTinyintArray = 45;
+    UnsignedFloatArray = 46;
+    UnsignedDoubleArray = 47;
 }
 
 message PName {
     string value = 1;
-}
-
-message AliasedNode {
-    // org.apache.phoenix.parse.AliasedNode
-    string alias = 1;
-    P_ParseNode node = 2;
-    bool isCaseSensitve = 3;
 }
 
 message PTableKey {
@@ -163,156 +193,94 @@ message ColumnDef {
     bool isRowTimestamp = 12;
 }
 
+message AliasedNode {
+    // org.apache.phoenix.parse.AliasedNode
+    string alias = 1;
+    P_ParseNode node = 2;
+    bool isCaseSensitve = 3;
+}
+
 message I_BindableStatement {
     oneof inherit {
-        DropTableStatement DropTableStatement = 1;
-        AddColumnStatement AddColumnStatement = 2;
-        DropColumnStatement DropColumnStatement = 3;
-        UpdateStatisticsStatement UpdateStatisticsStatement = 4;
-        CreateIndexStatement CreateIndexStatement = 5;
-        DMLStatement DMLStatement = 6;
-        DeleteStatement DeleteStatement = 7;
-        UpsertStatement UpsertStatement = 8;
-        AlterIndexStatement AlterIndexStatement = 9;
-        DropSequenceStatement DropSequenceStatement = 10;
-        AlterSessionStatement AlterSessionStatement = 11;
-        CreateSequenceStatement CreateSequenceStatement = 12;
-        CreateFunctionStatement CreateFunctionStatement = 13;
+        AlterSessionStatement AlterSessionStatement = 1;
+        DMLStatement DMLStatement = 2;
+        DeleteStatement DeleteStatement = 3;
+        UpsertStatement UpsertStatement = 4;
+        UpdateStatisticsStatement UpdateStatisticsStatement = 5;
+        AlterIndexStatement AlterIndexStatement = 6;
+        DropColumnStatement DropColumnStatement = 7;
+        AddColumnStatement AddColumnStatement = 8;
+        CreateIndexStatement CreateIndexStatement = 9;
+        DropTableStatement DropTableStatement = 10;
+        CreateSequenceStatement CreateSequenceStatement = 11;
+        CreateTableStatement CreateTableStatement = 12;
+        DropSequenceStatement DropSequenceStatement = 13;
         DropIndexStatement DropIndexStatement = 14;
-        CreateSchemaStatement CreateSchemaStatement = 15;
-        DropSchemaStatement DropSchemaStatement = 16;
-        CreateTableStatement CreateTableStatement = 17;
-        AddJarsStatement AddJarsStatement = 18;
-        DeleteJarStatement DeleteJarStatement = 19;
-        DropFunctionStatement DropFunctionStatement = 20;
-        UseSchemaStatement UseSchemaStatement = 21;
-        CloseStatement CloseStatement = 22;
-        ExecuteUpgradeStatement ExecuteUpgradeStatement = 23;
+        DeleteJarStatement DeleteJarStatement = 15;
+        UseSchemaStatement UseSchemaStatement = 16;
+        DropFunctionStatement DropFunctionStatement = 17;
+        CreateFunctionStatement CreateFunctionStatement = 18;
+        DropSchemaStatement DropSchemaStatement = 19;
+        AddJarsStatement AddJarsStatement = 20;
+        CreateSchemaStatement CreateSchemaStatement = 21;
+        FetchStatement FetchStatement = 22;
+        ListJarsStatement ListJarsStatement = 23;
         SelectStatement SelectStatement = 24;
-        OpenStatement OpenStatement = 25;
-        FetchStatement FetchStatement = 26;
-        DeclareCursorStatement DeclareCursorStatement = 27;
-        TraceStatement TraceStatement = 28;
-        ListJarsStatement ListJarsStatement = 29;
-        ChangePermsStatement ChangePermsStatement = 30;
-        ExplainStatement ExplainStatement = 31;
+        DeclareCursorStatement DeclareCursorStatement = 25;
+        ChangePermsStatement ChangePermsStatement = 26;
+        TraceStatement TraceStatement = 27;
+        OpenStatement OpenStatement = 28;
+        ExplainStatement ExplainStatement = 29;
+        ExecuteUpgradeStatement ExecuteUpgradeStatement = 30;
+        CloseStatement CloseStatement = 31;
     }
 }
 
 message P_MutableStatement {
     oneof inherit {
-        DropTableStatement DropTableStatement = 1;
-        AddColumnStatement AddColumnStatement = 2;
-        DropColumnStatement DropColumnStatement = 3;
-        UpdateStatisticsStatement UpdateStatisticsStatement = 4;
-        CreateIndexStatement CreateIndexStatement = 5;
-        DMLStatement DMLStatement = 6;
-        DeleteStatement DeleteStatement = 7;
-        UpsertStatement UpsertStatement = 8;
-        AlterIndexStatement AlterIndexStatement = 9;
-        DropSequenceStatement DropSequenceStatement = 10;
-        AlterSessionStatement AlterSessionStatement = 11;
-        CreateSequenceStatement CreateSequenceStatement = 12;
-        CreateFunctionStatement CreateFunctionStatement = 13;
+        AlterSessionStatement AlterSessionStatement = 1;
+        DMLStatement DMLStatement = 2;
+        DeleteStatement DeleteStatement = 3;
+        UpsertStatement UpsertStatement = 4;
+        UpdateStatisticsStatement UpdateStatisticsStatement = 5;
+        AlterIndexStatement AlterIndexStatement = 6;
+        DropColumnStatement DropColumnStatement = 7;
+        AddColumnStatement AddColumnStatement = 8;
+        CreateIndexStatement CreateIndexStatement = 9;
+        DropTableStatement DropTableStatement = 10;
+        CreateSequenceStatement CreateSequenceStatement = 11;
+        CreateTableStatement CreateTableStatement = 12;
+        DropSequenceStatement DropSequenceStatement = 13;
         DropIndexStatement DropIndexStatement = 14;
-        CreateSchemaStatement CreateSchemaStatement = 15;
-        DropSchemaStatement DropSchemaStatement = 16;
-        CreateTableStatement CreateTableStatement = 17;
-        AddJarsStatement AddJarsStatement = 18;
-        DeleteJarStatement DeleteJarStatement = 19;
-        DropFunctionStatement DropFunctionStatement = 20;
-        UseSchemaStatement UseSchemaStatement = 21;
+        DeleteJarStatement DeleteJarStatement = 15;
+        UseSchemaStatement UseSchemaStatement = 16;
+        DropFunctionStatement DropFunctionStatement = 17;
+        CreateFunctionStatement CreateFunctionStatement = 18;
+        DropSchemaStatement DropSchemaStatement = 19;
+        AddJarsStatement AddJarsStatement = 20;
+        CreateSchemaStatement CreateSchemaStatement = 21;
     }
 }
 
-message DropTableStatement {
+message AlterSessionStatement {
     // org.apache.phoenix.parse.BindableStatement
     int32 bindCount = 1;
     Operation operation = 2;
     // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.DropTableStatement
-    bool cascade = 3;
-    TableName tableName = 4;
-    PTableType tableType = 5;
-    bool ifExists = 6;
+    // org.apache.phoenix.parse.AlterSessionStatement
 }
 
 message P_SingleTableStatement {
     oneof inherit {
-        AddColumnStatement AddColumnStatement = 1;
-        DropColumnStatement DropColumnStatement = 2;
-        UpdateStatisticsStatement UpdateStatisticsStatement = 3;
-        CreateIndexStatement CreateIndexStatement = 4;
-        DMLStatement DMLStatement = 5;
-        DeleteStatement DeleteStatement = 6;
-        UpsertStatement UpsertStatement = 7;
-        AlterIndexStatement AlterIndexStatement = 8;
+        DMLStatement DMLStatement = 1;
+        DeleteStatement DeleteStatement = 2;
+        UpsertStatement UpsertStatement = 3;
+        UpdateStatisticsStatement UpdateStatisticsStatement = 4;
+        AlterIndexStatement AlterIndexStatement = 5;
+        DropColumnStatement DropColumnStatement = 6;
+        AddColumnStatement AddColumnStatement = 7;
+        CreateIndexStatement CreateIndexStatement = 8;
     }
-}
-
-message P_AlterTableStatement {
-    oneof inherit {
-        AddColumnStatement AddColumnStatement = 1;
-        DropColumnStatement DropColumnStatement = 2;
-    }
-}
-
-message AddColumnStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.SingleTableStatement
-    NamedTableNode table = 3;
-    // org.apache.phoenix.parse.AlterTableStatement
-    PTableType tableType = 4;
-    // org.apache.phoenix.parse.AddColumnStatement
-    repeated ColumnDef columnDefs = 5;
-    bool ifNotExists = 6;
-}
-
-message DropColumnStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.SingleTableStatement
-    NamedTableNode table = 3;
-    // org.apache.phoenix.parse.AlterTableStatement
-    PTableType tableType = 4;
-    // org.apache.phoenix.parse.DropColumnStatement
-    repeated ColumnName columnRefs = 5;
-    bool ifExists = 6;
-}
-
-message UpdateStatisticsStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.SingleTableStatement
-    NamedTableNode table = 3;
-    // org.apache.phoenix.parse.UpdateStatisticsStatement
-    bool updateAll = 4;
-    bool updateColumns = 5;
-    bool updateIndex = 6;
-}
-
-message CreateIndexStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.SingleTableStatement
-    NamedTableNode table = 3;
-    // org.apache.phoenix.parse.CreateIndexStatement
-    repeated ColumnName includeColumns = 4;
-    IndexKeyConstraint indexConstraint = 5;
-    TableName indexTableName = 6;
-    IndexType indexType = 7;
-    repeated P_ParseNode splitNodes = 8;
-    bool ifNotExists = 9;
-    bool isAsync = 10;
 }
 
 message P_DMLStatement {
@@ -373,6 +341,19 @@ message UpsertStatement {
     repeated P_ParseNode values = 8;
 }
 
+message UpdateStatisticsStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.MutableStatement
+    // org.apache.phoenix.parse.SingleTableStatement
+    NamedTableNode table = 3;
+    // org.apache.phoenix.parse.UpdateStatisticsStatement
+    bool updateAll = 4;
+    bool updateColumns = 5;
+    bool updateIndex = 6;
+}
+
 message AlterIndexStatement {
     // org.apache.phoenix.parse.BindableStatement
     int32 bindCount = 1;
@@ -388,22 +369,68 @@ message AlterIndexStatement {
     bool isAsync = 8;
 }
 
-message DropSequenceStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.DropSequenceStatement
-    TableName sequenceName = 3;
-    bool ifExists = 4;
+message P_AlterTableStatement {
+    oneof inherit {
+        DropColumnStatement DropColumnStatement = 1;
+        AddColumnStatement AddColumnStatement = 2;
+    }
 }
 
-message AlterSessionStatement {
+message DropColumnStatement {
     // org.apache.phoenix.parse.BindableStatement
     int32 bindCount = 1;
     Operation operation = 2;
     // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.AlterSessionStatement
+    // org.apache.phoenix.parse.SingleTableStatement
+    NamedTableNode table = 3;
+    // org.apache.phoenix.parse.AlterTableStatement
+    PTableType tableType = 4;
+    // org.apache.phoenix.parse.DropColumnStatement
+    repeated ColumnName columnRefs = 5;
+    bool ifExists = 6;
+}
+
+message AddColumnStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.MutableStatement
+    // org.apache.phoenix.parse.SingleTableStatement
+    NamedTableNode table = 3;
+    // org.apache.phoenix.parse.AlterTableStatement
+    PTableType tableType = 4;
+    // org.apache.phoenix.parse.AddColumnStatement
+    repeated ColumnDef columnDefs = 5;
+    bool ifNotExists = 6;
+}
+
+message CreateIndexStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.MutableStatement
+    // org.apache.phoenix.parse.SingleTableStatement
+    NamedTableNode table = 3;
+    // org.apache.phoenix.parse.CreateIndexStatement
+    repeated ColumnName includeColumns = 4;
+    IndexKeyConstraint indexConstraint = 5;
+    TableName indexTableName = 6;
+    IndexType indexType = 7;
+    repeated P_ParseNode splitNodes = 8;
+    bool ifNotExists = 9;
+    bool isAsync = 10;
+}
+
+message DropTableStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.MutableStatement
+    // org.apache.phoenix.parse.DropTableStatement
+    bool cascade = 3;
+    TableName tableName = 4;
+    PTableType tableType = 5;
+    bool ifExists = 6;
 }
 
 message CreateSequenceStatement {
@@ -420,49 +447,6 @@ message CreateSequenceStatement {
     TableName sequenceName = 8;
     P_ParseNode startWith = 9;
     bool ifNotExists = 10;
-}
-
-message CreateFunctionStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.CreateFunctionStatement
-    PFunction functionInfo = 3;
-    bool isReplace = 4;
-    bool isTemporary = 5;
-}
-
-message DropIndexStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.DropIndexStatement
-    P_NamedNode indexName = 3;
-    TableName tableName = 4;
-    bool ifExists = 5;
-}
-
-message CreateSchemaStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.CreateSchemaStatement
-    string schemaName = 3;
-    bool isIfNotExists = 4;
-}
-
-message DropSchemaStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.DropSchemaStatement
-    bool cascade = 3;
-    string schemaName = 4;
-    bool ifExists = 5;
 }
 
 message CreateTableStatement {
@@ -482,13 +466,25 @@ message CreateTableStatement {
     bool immutableRows = 11;
 }
 
-message AddJarsStatement {
+message DropSequenceStatement {
     // org.apache.phoenix.parse.BindableStatement
     int32 bindCount = 1;
     Operation operation = 2;
     // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.AddJarsStatement
-    repeated LiteralParseNode jarPaths = 3;
+    // org.apache.phoenix.parse.DropSequenceStatement
+    TableName sequenceName = 3;
+    bool ifExists = 4;
+}
+
+message DropIndexStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.MutableStatement
+    // org.apache.phoenix.parse.DropIndexStatement
+    P_NamedNode indexName = 3;
+    TableName tableName = 4;
+    bool ifExists = 5;
 }
 
 message DeleteJarStatement {
@@ -498,6 +494,15 @@ message DeleteJarStatement {
     // org.apache.phoenix.parse.MutableStatement
     // org.apache.phoenix.parse.DeleteJarStatement
     LiteralParseNode jarPath = 3;
+}
+
+message UseSchemaStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.MutableStatement
+    // org.apache.phoenix.parse.UseSchemaStatement
+    string schemaName = 3;
 }
 
 message DropFunctionStatement {
@@ -510,28 +515,62 @@ message DropFunctionStatement {
     bool ifExists = 4;
 }
 
-message UseSchemaStatement {
+message CreateFunctionStatement {
     // org.apache.phoenix.parse.BindableStatement
     int32 bindCount = 1;
     Operation operation = 2;
     // org.apache.phoenix.parse.MutableStatement
-    // org.apache.phoenix.parse.UseSchemaStatement
+    // org.apache.phoenix.parse.CreateFunctionStatement
+    PFunction functionInfo = 3;
+    bool isReplace = 4;
+    bool isTemporary = 5;
+}
+
+message DropSchemaStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.MutableStatement
+    // org.apache.phoenix.parse.DropSchemaStatement
+    bool cascade = 3;
+    string schemaName = 4;
+    bool ifExists = 5;
+}
+
+message AddJarsStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.MutableStatement
+    // org.apache.phoenix.parse.AddJarsStatement
+    repeated LiteralParseNode jarPaths = 3;
+}
+
+message CreateSchemaStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.MutableStatement
+    // org.apache.phoenix.parse.CreateSchemaStatement
     string schemaName = 3;
+    bool isIfNotExists = 4;
 }
 
-message CloseStatement {
+message FetchStatement {
     // org.apache.phoenix.parse.BindableStatement
     int32 bindCount = 1;
     Operation operation = 2;
-    // org.apache.phoenix.parse.CloseStatement
-    string cursorName = 3;
+    // org.apache.phoenix.parse.FetchStatement
+    CursorName cursorName = 3;
+    int32 fetchSize = 4;
+    bool isNext = 5;
 }
 
-message ExecuteUpgradeStatement {
+message ListJarsStatement {
     // org.apache.phoenix.parse.BindableStatement
     int32 bindCount = 1;
     Operation operation = 2;
-    // org.apache.phoenix.parse.ExecuteUpgradeStatement
+    // org.apache.phoenix.parse.ListJarsStatement
 }
 
 message I_FilterableStatement {
@@ -563,24 +602,6 @@ message SelectStatement {
     bool isUnion = 17;
 }
 
-message OpenStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.OpenStatement
-    string cursorName = 3;
-}
-
-message FetchStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.FetchStatement
-    CursorName cursorName = 3;
-    int32 fetchSize = 4;
-    bool isNext = 5;
-}
-
 message DeclareCursorStatement {
     // org.apache.phoenix.parse.BindableStatement
     int32 bindCount = 1;
@@ -590,22 +611,6 @@ message DeclareCursorStatement {
     string querySQL = 4;
     SelectStatement select = 5;
     repeated OrderByNode selectOrderBy = 6;
-}
-
-message TraceStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.TraceStatement
-    double samplingRate = 3;
-    bool isTraceOn = 4;
-}
-
-message ListJarsStatement {
-    // org.apache.phoenix.parse.BindableStatement
-    int32 bindCount = 1;
-    Operation operation = 2;
-    // org.apache.phoenix.parse.ListJarsStatement
 }
 
 message ChangePermsStatement {
@@ -620,6 +625,23 @@ message ChangePermsStatement {
     bool isGrantStatement = 7;
 }
 
+message TraceStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.TraceStatement
+    double samplingRate = 3;
+    bool isTraceOn = 4;
+}
+
+message OpenStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.OpenStatement
+    string cursorName = 3;
+}
+
 message ExplainStatement {
     // org.apache.phoenix.parse.BindableStatement
     int32 bindCount = 1;
@@ -628,9 +650,19 @@ message ExplainStatement {
     I_BindableStatement statement = 3;
 }
 
-message OffsetNode {
-    // org.apache.phoenix.parse.OffsetNode
-    P_ParseNode offsetParseNode = 1;
+message ExecuteUpgradeStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.ExecuteUpgradeStatement
+}
+
+message CloseStatement {
+    // org.apache.phoenix.parse.BindableStatement
+    int32 bindCount = 1;
+    Operation operation = 2;
+    // org.apache.phoenix.parse.CloseStatement
+    string cursorName = 3;
 }
 
 message PFunction {
@@ -647,296 +679,178 @@ message PFunction {
     bool isTemporaryFunction = 10;
 }
 
-message LimitNode {
-    // org.apache.phoenix.parse.LimitNode
-    P_ParseNode limitParseNode = 1;
-}
-
-message P_NamedNode {
-    oneof inherit {
-        NamedNode NamedNode = 1;
-        PrimaryKeyConstraint PrimaryKeyConstraint = 2;
-    }
-}
-
-message NamedNode {
-    // org.apache.phoenix.parse.NamedNode
-    string name = 1;
-    bool isCaseSensitive = 2;
-}
-
-message PrimaryKeyConstraint {
-    message Pair_ColumnName_SortOrder {
-        ColumnName first = 1;
-        SortOrder second = 2;
-    }
-
-    // org.apache.phoenix.parse.NamedNode
-    string name = 1;
-    bool isCaseSensitive = 2;
-    // org.apache.phoenix.parse.PrimaryKeyConstraint
-    repeated Pair_ColumnName_SortOrder columnNames = 3;
-    int32 numColumnsWithRowTimestamp = 4;
-}
-
-message IndexKeyConstraint {
-    message Pair_ParseNode_SortOrder {
-        P_ParseNode first = 1;
-        SortOrder second = 2;
-    }
-
-    // org.apache.phoenix.parse.IndexKeyConstraint
-    repeated Pair_ParseNode_SortOrder parseNodeAndSortOrderList = 1;
-}
-
-message P_TableNode {
-    oneof inherit {
-        NamedTableNode NamedTableNode = 1;
-        BindTableNode BindTableNode = 2;
-        JoinTableNode JoinTableNode = 3;
-        DerivedTableNode DerivedTableNode = 4;
-    }
-}
-
-message P_ConcreteTableNode {
-    oneof inherit {
-        NamedTableNode NamedTableNode = 1;
-        BindTableNode BindTableNode = 2;
-    }
-}
-
-message NamedTableNode {
-    // org.apache.phoenix.parse.TableNode
-    string alias = 1;
-    // org.apache.phoenix.parse.ConcreteTableNode
-    TableName name = 2;
-    double tableSamplingRate = 3;
-    // org.apache.phoenix.parse.NamedTableNode
-    repeated ColumnDef dynamicColumns = 4;
-}
-
-message BindTableNode {
-    // org.apache.phoenix.parse.TableNode
-    string alias = 1;
-    // org.apache.phoenix.parse.ConcreteTableNode
-    TableName name = 2;
-    double tableSamplingRate = 3;
-    // org.apache.phoenix.parse.BindTableNode
-}
-
-message JoinTableNode {
-    // org.apache.phoenix.parse.TableNode
-    string alias = 1;
-    // org.apache.phoenix.parse.JoinTableNode
-    P_TableNode lHS = 2;
-    P_ParseNode onNode = 3;
-    P_TableNode rHS = 4;
-    JoinType type = 5;
-    bool isSingleValueOnly = 6;
-}
-
-message DerivedTableNode {
-    // org.apache.phoenix.parse.TableNode
-    string alias = 1;
-    // org.apache.phoenix.parse.DerivedTableNode
-    SelectStatement select = 2;
-}
-
-message CursorName {
-    // org.apache.phoenix.parse.CursorName
-    string name = 1;
-    bool isCaseSensitive = 2;
-}
-
-message ColumnName {
-    // org.apache.phoenix.parse.ColumnName
-    P_NamedNode columnNode = 1;
-    P_NamedNode familyNode = 2;
-}
-
-message FunctionArgument {
-    // org.apache.phoenix.parse.PFunction$FunctionArgument
-    int32 argPosition = 1;
-    string argumentType = 2;
-    string defaultValue = 3;
-    string maxValue = 4;
-    string minValue = 5;
-    bool isArrayType = 6;
-    bool isConstant = 7;
-}
-
 message P_ParseNode {
     oneof inherit {
-        StringConcatParseNode StringConcatParseNode = 1;
+        RowValueConstructorParseNode RowValueConstructorParseNode = 1;
         FunctionParseNode FunctionParseNode = 2;
-        AggregateFunctionParseNode AggregateFunctionParseNode = 3;
-        AggregateFunctionWithinGroupParseNode AggregateFunctionWithinGroupParseNode = 4;
-        SumAggregateParseNode SumAggregateParseNode = 5;
-        LastValuesAggregateParseNode LastValuesAggregateParseNode = 6;
-        FirstValuesAggregateParseNode FirstValuesAggregateParseNode = 7;
-        NthValueAggregateParseNode NthValueAggregateParseNode = 8;
-        MinAggregateParseNode MinAggregateParseNode = 9;
-        MaxAggregateParseNode MaxAggregateParseNode = 10;
-        LastValueAggregateParseNode LastValueAggregateParseNode = 11;
-        DistinctCountHyperLogLogAggregateParseNode DistinctCountHyperLogLogAggregateParseNode = 12;
-        FirstValueAggregateParseNode FirstValueAggregateParseNode = 13;
-        DistinctCountParseNode DistinctCountParseNode = 14;
-        AvgAggregateParseNode AvgAggregateParseNode = 15;
-        ToTimeParseNode ToTimeParseNode = 16;
-        CurrentTimeParseNode CurrentTimeParseNode = 17;
-        ToCharParseNode ToCharParseNode = 18;
-        RegexpSplitParseNode RegexpSplitParseNode = 19;
-        ToTimestampParseNode ToTimestampParseNode = 20;
-        CurrentDateParseNode CurrentDateParseNode = 21;
-        RegexpReplaceParseNode RegexpReplaceParseNode = 22;
-        ToNumberParseNode ToNumberParseNode = 23;
-        ArrayModifierParseNode ArrayModifierParseNode = 24;
-        RegexpSubstrParseNode RegexpSubstrParseNode = 25;
-        FloorParseNode FloorParseNode = 26;
-        UDFParseNode UDFParseNode = 27;
-        ToDateParseNode ToDateParseNode = 28;
-        RoundParseNode RoundParseNode = 29;
-        CeilParseNode CeilParseNode = 30;
-        MultiplyParseNode MultiplyParseNode = 31;
-        AddParseNode AddParseNode = 32;
-        SubtractParseNode SubtractParseNode = 33;
-        ModulusParseNode ModulusParseNode = 34;
-        DivideParseNode DivideParseNode = 35;
-        LessThanOrEqualParseNode LessThanOrEqualParseNode = 36;
+        UDFParseNode UDFParseNode = 3;
+        AggregateFunctionParseNode AggregateFunctionParseNode = 4;
+        FirstValuesAggregateParseNode FirstValuesAggregateParseNode = 5;
+        NthValueAggregateParseNode NthValueAggregateParseNode = 6;
+        MinAggregateParseNode MinAggregateParseNode = 7;
+        DistinctCountParseNode DistinctCountParseNode = 8;
+        LastValuesAggregateParseNode LastValuesAggregateParseNode = 9;
+        SumAggregateParseNode SumAggregateParseNode = 10;
+        FirstValueAggregateParseNode FirstValueAggregateParseNode = 11;
+        LastValueAggregateParseNode LastValueAggregateParseNode = 12;
+        DistinctCountHyperLogLogAggregateParseNode DistinctCountHyperLogLogAggregateParseNode = 13;
+        MaxAggregateParseNode MaxAggregateParseNode = 14;
+        AggregateFunctionWithinGroupParseNode AggregateFunctionWithinGroupParseNode = 15;
+        AvgAggregateParseNode AvgAggregateParseNode = 16;
+        RegexpReplaceParseNode RegexpReplaceParseNode = 17;
+        ToTimeParseNode ToTimeParseNode = 18;
+        CurrentTimeParseNode CurrentTimeParseNode = 19;
+        ToNumberParseNode ToNumberParseNode = 20;
+        RoundParseNode RoundParseNode = 21;
+        ArrayModifierParseNode ArrayModifierParseNode = 22;
+        RegexpSubstrParseNode RegexpSubstrParseNode = 23;
+        FloorParseNode FloorParseNode = 24;
+        ToDateParseNode ToDateParseNode = 25;
+        RegexpSplitParseNode RegexpSplitParseNode = 26;
+        CurrentDateParseNode CurrentDateParseNode = 27;
+        CeilParseNode CeilParseNode = 28;
+        ToTimestampParseNode ToTimestampParseNode = 29;
+        ToCharParseNode ToCharParseNode = 30;
+        BetweenParseNode BetweenParseNode = 31;
+        ArrayAnyComparisonNode ArrayAnyComparisonNode = 32;
+        ArrayAllComparisonNode ArrayAllComparisonNode = 33;
+        EqualParseNode EqualParseNode = 34;
+        LessThanParseNode LessThanParseNode = 35;
+        GreaterThanParseNode GreaterThanParseNode = 36;
         NotEqualParseNode NotEqualParseNode = 37;
-        EqualParseNode EqualParseNode = 38;
-        LessThanParseNode LessThanParseNode = 39;
-        GreaterThanParseNode GreaterThanParseNode = 40;
-        GreaterThanOrEqualParseNode GreaterThanOrEqualParseNode = 41;
-        InParseNode InParseNode = 42;
-        LikeParseNode LikeParseNode = 43;
-        OrParseNode OrParseNode = 44;
-        ArrayAnyComparisonNode ArrayAnyComparisonNode = 45;
-        ArrayAllComparisonNode ArrayAllComparisonNode = 46;
-        ArrayElemRefNode ArrayElemRefNode = 47;
+        LessThanOrEqualParseNode LessThanOrEqualParseNode = 38;
+        GreaterThanOrEqualParseNode GreaterThanOrEqualParseNode = 39;
+        LikeParseNode LikeParseNode = 40;
+        InParseNode InParseNode = 41;
+        ArrayElemRefNode ArrayElemRefNode = 42;
+        NotParseNode NotParseNode = 43;
+        IsNullParseNode IsNullParseNode = 44;
+        CastParseNode CastParseNode = 45;
+        ExistsParseNode ExistsParseNode = 46;
+        OrParseNode OrParseNode = 47;
         InListParseNode InListParseNode = 48;
-        ExistsParseNode ExistsParseNode = 49;
-        NotParseNode NotParseNode = 50;
-        IsNullParseNode IsNullParseNode = 51;
-        CastParseNode CastParseNode = 52;
-        RowValueConstructorParseNode RowValueConstructorParseNode = 53;
-        ArrayConstructorNode ArrayConstructorNode = 54;
-        AndParseNode AndParseNode = 55;
-        CaseParseNode CaseParseNode = 56;
-        BetweenParseNode BetweenParseNode = 57;
-        SubqueryParseNode SubqueryParseNode = 58;
-        WildcardParseNode WildcardParseNode = 59;
+        AndParseNode AndParseNode = 49;
+        SubtractParseNode SubtractParseNode = 50;
+        ModulusParseNode ModulusParseNode = 51;
+        MultiplyParseNode MultiplyParseNode = 52;
+        AddParseNode AddParseNode = 53;
+        DivideParseNode DivideParseNode = 54;
+        ArrayConstructorNode ArrayConstructorNode = 55;
+        StringConcatParseNode StringConcatParseNode = 56;
+        CaseParseNode CaseParseNode = 57;
+        ColumnParseNode ColumnParseNode = 58;
+        TableWildcardParseNode TableWildcardParseNode = 59;
         BindParseNode BindParseNode = 60;
-        TableWildcardParseNode TableWildcardParseNode = 61;
-        ColumnParseNode ColumnParseNode = 62;
-        FamilyWildcardParseNode FamilyWildcardParseNode = 63;
-        SequenceValueParseNode SequenceValueParseNode = 64;
-        LiteralParseNode LiteralParseNode = 65;
+        FamilyWildcardParseNode FamilyWildcardParseNode = 61;
+        SequenceValueParseNode SequenceValueParseNode = 62;
+        SubqueryParseNode SubqueryParseNode = 63;
+        LiteralParseNode LiteralParseNode = 64;
+        WildcardParseNode WildcardParseNode = 65;
     }
 }
 
 message P_CompoundParseNode {
     oneof inherit {
-        StringConcatParseNode StringConcatParseNode = 1;
+        RowValueConstructorParseNode RowValueConstructorParseNode = 1;
         FunctionParseNode FunctionParseNode = 2;
-        AggregateFunctionParseNode AggregateFunctionParseNode = 3;
-        AggregateFunctionWithinGroupParseNode AggregateFunctionWithinGroupParseNode = 4;
-        SumAggregateParseNode SumAggregateParseNode = 5;
-        LastValuesAggregateParseNode LastValuesAggregateParseNode = 6;
-        FirstValuesAggregateParseNode FirstValuesAggregateParseNode = 7;
-        NthValueAggregateParseNode NthValueAggregateParseNode = 8;
-        MinAggregateParseNode MinAggregateParseNode = 9;
-        MaxAggregateParseNode MaxAggregateParseNode = 10;
-        LastValueAggregateParseNode LastValueAggregateParseNode = 11;
-        DistinctCountHyperLogLogAggregateParseNode DistinctCountHyperLogLogAggregateParseNode = 12;
-        FirstValueAggregateParseNode FirstValueAggregateParseNode = 13;
-        DistinctCountParseNode DistinctCountParseNode = 14;
-        AvgAggregateParseNode AvgAggregateParseNode = 15;
-        ToTimeParseNode ToTimeParseNode = 16;
-        CurrentTimeParseNode CurrentTimeParseNode = 17;
-        ToCharParseNode ToCharParseNode = 18;
-        RegexpSplitParseNode RegexpSplitParseNode = 19;
-        ToTimestampParseNode ToTimestampParseNode = 20;
-        CurrentDateParseNode CurrentDateParseNode = 21;
-        RegexpReplaceParseNode RegexpReplaceParseNode = 22;
-        ToNumberParseNode ToNumberParseNode = 23;
-        ArrayModifierParseNode ArrayModifierParseNode = 24;
-        RegexpSubstrParseNode RegexpSubstrParseNode = 25;
-        FloorParseNode FloorParseNode = 26;
-        UDFParseNode UDFParseNode = 27;
-        ToDateParseNode ToDateParseNode = 28;
-        RoundParseNode RoundParseNode = 29;
-        CeilParseNode CeilParseNode = 30;
-        MultiplyParseNode MultiplyParseNode = 31;
-        AddParseNode AddParseNode = 32;
-        SubtractParseNode SubtractParseNode = 33;
-        ModulusParseNode ModulusParseNode = 34;
-        DivideParseNode DivideParseNode = 35;
-        LessThanOrEqualParseNode LessThanOrEqualParseNode = 36;
+        UDFParseNode UDFParseNode = 3;
+        AggregateFunctionParseNode AggregateFunctionParseNode = 4;
+        FirstValuesAggregateParseNode FirstValuesAggregateParseNode = 5;
+        NthValueAggregateParseNode NthValueAggregateParseNode = 6;
+        MinAggregateParseNode MinAggregateParseNode = 7;
+        DistinctCountParseNode DistinctCountParseNode = 8;
+        LastValuesAggregateParseNode LastValuesAggregateParseNode = 9;
+        SumAggregateParseNode SumAggregateParseNode = 10;
+        FirstValueAggregateParseNode FirstValueAggregateParseNode = 11;
+        LastValueAggregateParseNode LastValueAggregateParseNode = 12;
+        DistinctCountHyperLogLogAggregateParseNode DistinctCountHyperLogLogAggregateParseNode = 13;
+        MaxAggregateParseNode MaxAggregateParseNode = 14;
+        AggregateFunctionWithinGroupParseNode AggregateFunctionWithinGroupParseNode = 15;
+        AvgAggregateParseNode AvgAggregateParseNode = 16;
+        RegexpReplaceParseNode RegexpReplaceParseNode = 17;
+        ToTimeParseNode ToTimeParseNode = 18;
+        CurrentTimeParseNode CurrentTimeParseNode = 19;
+        ToNumberParseNode ToNumberParseNode = 20;
+        RoundParseNode RoundParseNode = 21;
+        ArrayModifierParseNode ArrayModifierParseNode = 22;
+        RegexpSubstrParseNode RegexpSubstrParseNode = 23;
+        FloorParseNode FloorParseNode = 24;
+        ToDateParseNode ToDateParseNode = 25;
+        RegexpSplitParseNode RegexpSplitParseNode = 26;
+        CurrentDateParseNode CurrentDateParseNode = 27;
+        CeilParseNode CeilParseNode = 28;
+        ToTimestampParseNode ToTimestampParseNode = 29;
+        ToCharParseNode ToCharParseNode = 30;
+        BetweenParseNode BetweenParseNode = 31;
+        ArrayAnyComparisonNode ArrayAnyComparisonNode = 32;
+        ArrayAllComparisonNode ArrayAllComparisonNode = 33;
+        EqualParseNode EqualParseNode = 34;
+        LessThanParseNode LessThanParseNode = 35;
+        GreaterThanParseNode GreaterThanParseNode = 36;
         NotEqualParseNode NotEqualParseNode = 37;
-        EqualParseNode EqualParseNode = 38;
-        LessThanParseNode LessThanParseNode = 39;
-        GreaterThanParseNode GreaterThanParseNode = 40;
-        GreaterThanOrEqualParseNode GreaterThanOrEqualParseNode = 41;
-        InParseNode InParseNode = 42;
-        LikeParseNode LikeParseNode = 43;
-        OrParseNode OrParseNode = 44;
-        ArrayAnyComparisonNode ArrayAnyComparisonNode = 45;
-        ArrayAllComparisonNode ArrayAllComparisonNode = 46;
-        ArrayElemRefNode ArrayElemRefNode = 47;
+        LessThanOrEqualParseNode LessThanOrEqualParseNode = 38;
+        GreaterThanOrEqualParseNode GreaterThanOrEqualParseNode = 39;
+        LikeParseNode LikeParseNode = 40;
+        InParseNode InParseNode = 41;
+        ArrayElemRefNode ArrayElemRefNode = 42;
+        NotParseNode NotParseNode = 43;
+        IsNullParseNode IsNullParseNode = 44;
+        CastParseNode CastParseNode = 45;
+        ExistsParseNode ExistsParseNode = 46;
+        OrParseNode OrParseNode = 47;
         InListParseNode InListParseNode = 48;
-        ExistsParseNode ExistsParseNode = 49;
-        NotParseNode NotParseNode = 50;
-        IsNullParseNode IsNullParseNode = 51;
-        CastParseNode CastParseNode = 52;
-        RowValueConstructorParseNode RowValueConstructorParseNode = 53;
-        ArrayConstructorNode ArrayConstructorNode = 54;
-        AndParseNode AndParseNode = 55;
-        CaseParseNode CaseParseNode = 56;
-        BetweenParseNode BetweenParseNode = 57;
+        AndParseNode AndParseNode = 49;
+        SubtractParseNode SubtractParseNode = 50;
+        ModulusParseNode ModulusParseNode = 51;
+        MultiplyParseNode MultiplyParseNode = 52;
+        AddParseNode AddParseNode = 53;
+        DivideParseNode DivideParseNode = 54;
+        ArrayConstructorNode ArrayConstructorNode = 55;
+        StringConcatParseNode StringConcatParseNode = 56;
+        CaseParseNode CaseParseNode = 57;
     }
 }
 
-message StringConcatParseNode {
+message RowValueConstructorParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
     repeated P_ParseNode children = 2;
     bool isStateless = 3;
     // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.StringConcatParseNode
+    // org.apache.phoenix.parse.RowValueConstructorParseNode
 }
 
 message P_FunctionParseNode {
     oneof inherit {
         FunctionParseNode FunctionParseNode = 1;
-        AggregateFunctionParseNode AggregateFunctionParseNode = 2;
-        AggregateFunctionWithinGroupParseNode AggregateFunctionWithinGroupParseNode = 3;
-        SumAggregateParseNode SumAggregateParseNode = 4;
-        LastValuesAggregateParseNode LastValuesAggregateParseNode = 5;
-        FirstValuesAggregateParseNode FirstValuesAggregateParseNode = 6;
-        NthValueAggregateParseNode NthValueAggregateParseNode = 7;
-        MinAggregateParseNode MinAggregateParseNode = 8;
-        MaxAggregateParseNode MaxAggregateParseNode = 9;
-        LastValueAggregateParseNode LastValueAggregateParseNode = 10;
-        DistinctCountHyperLogLogAggregateParseNode DistinctCountHyperLogLogAggregateParseNode = 11;
-        FirstValueAggregateParseNode FirstValueAggregateParseNode = 12;
-        DistinctCountParseNode DistinctCountParseNode = 13;
-        AvgAggregateParseNode AvgAggregateParseNode = 14;
-        ToTimeParseNode ToTimeParseNode = 15;
-        CurrentTimeParseNode CurrentTimeParseNode = 16;
-        ToCharParseNode ToCharParseNode = 17;
-        RegexpSplitParseNode RegexpSplitParseNode = 18;
-        ToTimestampParseNode ToTimestampParseNode = 19;
-        CurrentDateParseNode CurrentDateParseNode = 20;
-        RegexpReplaceParseNode RegexpReplaceParseNode = 21;
-        ToNumberParseNode ToNumberParseNode = 22;
-        ArrayModifierParseNode ArrayModifierParseNode = 23;
-        RegexpSubstrParseNode RegexpSubstrParseNode = 24;
-        FloorParseNode FloorParseNode = 25;
-        UDFParseNode UDFParseNode = 26;
-        ToDateParseNode ToDateParseNode = 27;
-        RoundParseNode RoundParseNode = 28;
-        CeilParseNode CeilParseNode = 29;
+        UDFParseNode UDFParseNode = 2;
+        AggregateFunctionParseNode AggregateFunctionParseNode = 3;
+        FirstValuesAggregateParseNode FirstValuesAggregateParseNode = 4;
+        NthValueAggregateParseNode NthValueAggregateParseNode = 5;
+        MinAggregateParseNode MinAggregateParseNode = 6;
+        DistinctCountParseNode DistinctCountParseNode = 7;
+        LastValuesAggregateParseNode LastValuesAggregateParseNode = 8;
+        SumAggregateParseNode SumAggregateParseNode = 9;
+        FirstValueAggregateParseNode FirstValueAggregateParseNode = 10;
+        LastValueAggregateParseNode LastValueAggregateParseNode = 11;
+        DistinctCountHyperLogLogAggregateParseNode DistinctCountHyperLogLogAggregateParseNode = 12;
+        MaxAggregateParseNode MaxAggregateParseNode = 13;
+        AggregateFunctionWithinGroupParseNode AggregateFunctionWithinGroupParseNode = 14;
+        AvgAggregateParseNode AvgAggregateParseNode = 15;
+        RegexpReplaceParseNode RegexpReplaceParseNode = 16;
+        ToTimeParseNode ToTimeParseNode = 17;
+        CurrentTimeParseNode CurrentTimeParseNode = 18;
+        ToNumberParseNode ToNumberParseNode = 19;
+        RoundParseNode RoundParseNode = 20;
+        ArrayModifierParseNode ArrayModifierParseNode = 21;
+        RegexpSubstrParseNode RegexpSubstrParseNode = 22;
+        FloorParseNode FloorParseNode = 23;
+        ToDateParseNode ToDateParseNode = 24;
+        RegexpSplitParseNode RegexpSplitParseNode = 25;
+        CurrentDateParseNode CurrentDateParseNode = 26;
+        CeilParseNode CeilParseNode = 27;
+        ToTimestampParseNode ToTimestampParseNode = 28;
+        ToCharParseNode ToCharParseNode = 29;
     }
 }
 
@@ -951,20 +865,32 @@ message FunctionParseNode {
     bool isAggregate = 5;
 }
 
+message UDFParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.FunctionParseNode
+    string name = 4;
+    bool isAggregate = 5;
+    // org.apache.phoenix.parse.UDFParseNode
+}
+
 message P_AggregateFunctionParseNode {
     oneof inherit {
         AggregateFunctionParseNode AggregateFunctionParseNode = 1;
-        AggregateFunctionWithinGroupParseNode AggregateFunctionWithinGroupParseNode = 2;
-        SumAggregateParseNode SumAggregateParseNode = 3;
-        LastValuesAggregateParseNode LastValuesAggregateParseNode = 4;
-        FirstValuesAggregateParseNode FirstValuesAggregateParseNode = 5;
-        NthValueAggregateParseNode NthValueAggregateParseNode = 6;
-        MinAggregateParseNode MinAggregateParseNode = 7;
-        MaxAggregateParseNode MaxAggregateParseNode = 8;
+        FirstValuesAggregateParseNode FirstValuesAggregateParseNode = 2;
+        NthValueAggregateParseNode NthValueAggregateParseNode = 3;
+        MinAggregateParseNode MinAggregateParseNode = 4;
+        DistinctCountParseNode DistinctCountParseNode = 5;
+        LastValuesAggregateParseNode LastValuesAggregateParseNode = 6;
+        SumAggregateParseNode SumAggregateParseNode = 7;
+        FirstValueAggregateParseNode FirstValueAggregateParseNode = 8;
         LastValueAggregateParseNode LastValueAggregateParseNode = 9;
         DistinctCountHyperLogLogAggregateParseNode DistinctCountHyperLogLogAggregateParseNode = 10;
-        FirstValueAggregateParseNode FirstValueAggregateParseNode = 11;
-        DistinctCountParseNode DistinctCountParseNode = 12;
+        MaxAggregateParseNode MaxAggregateParseNode = 11;
+        AggregateFunctionWithinGroupParseNode AggregateFunctionWithinGroupParseNode = 12;
         AvgAggregateParseNode AvgAggregateParseNode = 13;
     }
 }
@@ -981,60 +907,19 @@ message AggregateFunctionParseNode {
     // org.apache.phoenix.parse.AggregateFunctionParseNode
 }
 
-message AggregateFunctionWithinGroupParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.FunctionParseNode
-    string name = 4;
-    bool isAggregate = 5;
-    // org.apache.phoenix.parse.AggregateFunctionParseNode
-    // org.apache.phoenix.parse.AggregateFunctionWithinGroupParseNode
-}
-
 message P_DelegateConstantToCountParseNode {
     oneof inherit {
-        SumAggregateParseNode SumAggregateParseNode = 1;
-        LastValuesAggregateParseNode LastValuesAggregateParseNode = 2;
-        FirstValuesAggregateParseNode FirstValuesAggregateParseNode = 3;
-        NthValueAggregateParseNode NthValueAggregateParseNode = 4;
-        MinAggregateParseNode MinAggregateParseNode = 5;
-        MaxAggregateParseNode MaxAggregateParseNode = 6;
-        LastValueAggregateParseNode LastValueAggregateParseNode = 7;
-        DistinctCountHyperLogLogAggregateParseNode DistinctCountHyperLogLogAggregateParseNode = 8;
-        FirstValueAggregateParseNode FirstValueAggregateParseNode = 9;
-        DistinctCountParseNode DistinctCountParseNode = 10;
+        FirstValuesAggregateParseNode FirstValuesAggregateParseNode = 1;
+        NthValueAggregateParseNode NthValueAggregateParseNode = 2;
+        MinAggregateParseNode MinAggregateParseNode = 3;
+        DistinctCountParseNode DistinctCountParseNode = 4;
+        LastValuesAggregateParseNode LastValuesAggregateParseNode = 5;
+        SumAggregateParseNode SumAggregateParseNode = 6;
+        FirstValueAggregateParseNode FirstValueAggregateParseNode = 7;
+        LastValueAggregateParseNode LastValueAggregateParseNode = 8;
+        DistinctCountHyperLogLogAggregateParseNode DistinctCountHyperLogLogAggregateParseNode = 9;
+        MaxAggregateParseNode MaxAggregateParseNode = 10;
     }
-}
-
-message SumAggregateParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.FunctionParseNode
-    string name = 4;
-    bool isAggregate = 5;
-    // org.apache.phoenix.parse.AggregateFunctionParseNode
-    // org.apache.phoenix.parse.DelegateConstantToCountParseNode
-    // org.apache.phoenix.parse.SumAggregateParseNode
-}
-
-message LastValuesAggregateParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.FunctionParseNode
-    string name = 4;
-    bool isAggregate = 5;
-    // org.apache.phoenix.parse.AggregateFunctionParseNode
-    // org.apache.phoenix.parse.DelegateConstantToCountParseNode
-    // org.apache.phoenix.parse.LastValuesAggregateParseNode
 }
 
 message FirstValuesAggregateParseNode {
@@ -1079,7 +964,7 @@ message MinAggregateParseNode {
     // org.apache.phoenix.parse.MinAggregateParseNode
 }
 
-message MaxAggregateParseNode {
+message DistinctCountParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
     repeated P_ParseNode children = 2;
@@ -1090,7 +975,49 @@ message MaxAggregateParseNode {
     bool isAggregate = 5;
     // org.apache.phoenix.parse.AggregateFunctionParseNode
     // org.apache.phoenix.parse.DelegateConstantToCountParseNode
-    // org.apache.phoenix.parse.MaxAggregateParseNode
+    // org.apache.phoenix.parse.DistinctCountParseNode
+}
+
+message LastValuesAggregateParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.FunctionParseNode
+    string name = 4;
+    bool isAggregate = 5;
+    // org.apache.phoenix.parse.AggregateFunctionParseNode
+    // org.apache.phoenix.parse.DelegateConstantToCountParseNode
+    // org.apache.phoenix.parse.LastValuesAggregateParseNode
+}
+
+message SumAggregateParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.FunctionParseNode
+    string name = 4;
+    bool isAggregate = 5;
+    // org.apache.phoenix.parse.AggregateFunctionParseNode
+    // org.apache.phoenix.parse.DelegateConstantToCountParseNode
+    // org.apache.phoenix.parse.SumAggregateParseNode
+}
+
+message FirstValueAggregateParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.FunctionParseNode
+    string name = 4;
+    bool isAggregate = 5;
+    // org.apache.phoenix.parse.AggregateFunctionParseNode
+    // org.apache.phoenix.parse.DelegateConstantToCountParseNode
+    // org.apache.phoenix.parse.FirstValueAggregateParseNode
 }
 
 message LastValueAggregateParseNode {
@@ -1121,7 +1048,7 @@ message DistinctCountHyperLogLogAggregateParseNode {
     // org.apache.phoenix.parse.DistinctCountHyperLogLogAggregateParseNode
 }
 
-message FirstValueAggregateParseNode {
+message MaxAggregateParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
     repeated P_ParseNode children = 2;
@@ -1132,10 +1059,10 @@ message FirstValueAggregateParseNode {
     bool isAggregate = 5;
     // org.apache.phoenix.parse.AggregateFunctionParseNode
     // org.apache.phoenix.parse.DelegateConstantToCountParseNode
-    // org.apache.phoenix.parse.FirstValueAggregateParseNode
+    // org.apache.phoenix.parse.MaxAggregateParseNode
 }
 
-message DistinctCountParseNode {
+message AggregateFunctionWithinGroupParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
     repeated P_ParseNode children = 2;
@@ -1145,8 +1072,7 @@ message DistinctCountParseNode {
     string name = 4;
     bool isAggregate = 5;
     // org.apache.phoenix.parse.AggregateFunctionParseNode
-    // org.apache.phoenix.parse.DelegateConstantToCountParseNode
-    // org.apache.phoenix.parse.DistinctCountParseNode
+    // org.apache.phoenix.parse.AggregateFunctionWithinGroupParseNode
 }
 
 message AvgAggregateParseNode {
@@ -1160,6 +1086,18 @@ message AvgAggregateParseNode {
     bool isAggregate = 5;
     // org.apache.phoenix.parse.AggregateFunctionParseNode
     // org.apache.phoenix.parse.AvgAggregateParseNode
+}
+
+message RegexpReplaceParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.FunctionParseNode
+    string name = 4;
+    bool isAggregate = 5;
+    // org.apache.phoenix.parse.RegexpReplaceParseNode
 }
 
 message ToTimeParseNode {
@@ -1186,66 +1124,6 @@ message CurrentTimeParseNode {
     // org.apache.phoenix.parse.CurrentTimeParseNode
 }
 
-message ToCharParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.FunctionParseNode
-    string name = 4;
-    bool isAggregate = 5;
-    // org.apache.phoenix.parse.ToCharParseNode
-}
-
-message RegexpSplitParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.FunctionParseNode
-    string name = 4;
-    bool isAggregate = 5;
-    // org.apache.phoenix.parse.RegexpSplitParseNode
-}
-
-message ToTimestampParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.FunctionParseNode
-    string name = 4;
-    bool isAggregate = 5;
-    // org.apache.phoenix.parse.ToTimestampParseNode
-}
-
-message CurrentDateParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.FunctionParseNode
-    string name = 4;
-    bool isAggregate = 5;
-    // org.apache.phoenix.parse.CurrentDateParseNode
-}
-
-message RegexpReplaceParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.FunctionParseNode
-    string name = 4;
-    bool isAggregate = 5;
-    // org.apache.phoenix.parse.RegexpReplaceParseNode
-}
-
 message ToNumberParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
@@ -1256,6 +1134,18 @@ message ToNumberParseNode {
     string name = 4;
     bool isAggregate = 5;
     // org.apache.phoenix.parse.ToNumberParseNode
+}
+
+message RoundParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.FunctionParseNode
+    string name = 4;
+    bool isAggregate = 5;
+    // org.apache.phoenix.parse.RoundParseNode
 }
 
 message ArrayModifierParseNode {
@@ -1294,18 +1184,6 @@ message FloorParseNode {
     // org.apache.phoenix.parse.FloorParseNode
 }
 
-message UDFParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.FunctionParseNode
-    string name = 4;
-    bool isAggregate = 5;
-    // org.apache.phoenix.parse.UDFParseNode
-}
-
 message ToDateParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
@@ -1318,7 +1196,7 @@ message ToDateParseNode {
     // org.apache.phoenix.parse.ToDateParseNode
 }
 
-message RoundParseNode {
+message RegexpSplitParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
     repeated P_ParseNode children = 2;
@@ -1327,7 +1205,19 @@ message RoundParseNode {
     // org.apache.phoenix.parse.FunctionParseNode
     string name = 4;
     bool isAggregate = 5;
-    // org.apache.phoenix.parse.RoundParseNode
+    // org.apache.phoenix.parse.RegexpSplitParseNode
+}
+
+message CurrentDateParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.FunctionParseNode
+    string name = 4;
+    bool isAggregate = 5;
+    // org.apache.phoenix.parse.CurrentDateParseNode
 }
 
 message CeilParseNode {
@@ -1342,119 +1232,91 @@ message CeilParseNode {
     // org.apache.phoenix.parse.CeilParseNode
 }
 
-message P_ArithmeticParseNode {
+message ToTimestampParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.FunctionParseNode
+    string name = 4;
+    bool isAggregate = 5;
+    // org.apache.phoenix.parse.ToTimestampParseNode
+}
+
+message ToCharParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.FunctionParseNode
+    string name = 4;
+    bool isAggregate = 5;
+    // org.apache.phoenix.parse.ToCharParseNode
+}
+
+message BetweenParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.BetweenParseNode
+    bool isNegate = 4;
+}
+
+message P_ArrayAllAnyComparisonNode {
     oneof inherit {
-        MultiplyParseNode MultiplyParseNode = 1;
-        AddParseNode AddParseNode = 2;
-        SubtractParseNode SubtractParseNode = 3;
-        ModulusParseNode ModulusParseNode = 4;
-        DivideParseNode DivideParseNode = 5;
+        ArrayAnyComparisonNode ArrayAnyComparisonNode = 1;
+        ArrayAllComparisonNode ArrayAllComparisonNode = 2;
     }
 }
 
-message MultiplyParseNode {
+message ArrayAnyComparisonNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
     repeated P_ParseNode children = 2;
     bool isStateless = 3;
     // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.ArithmeticParseNode
-    string operator = 4;
-    // org.apache.phoenix.parse.MultiplyParseNode
+    // org.apache.phoenix.parse.ArrayAllAnyComparisonNode
+    string type = 4;
+    // org.apache.phoenix.parse.ArrayAnyComparisonNode
 }
 
-message AddParseNode {
+message ArrayAllComparisonNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
     repeated P_ParseNode children = 2;
     bool isStateless = 3;
     // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.ArithmeticParseNode
-    string operator = 4;
-    // org.apache.phoenix.parse.AddParseNode
-}
-
-message SubtractParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.ArithmeticParseNode
-    string operator = 4;
-    // org.apache.phoenix.parse.SubtractParseNode
-}
-
-message ModulusParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.ArithmeticParseNode
-    string operator = 4;
-    // org.apache.phoenix.parse.ModulusParseNode
-}
-
-message DivideParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.ArithmeticParseNode
-    string operator = 4;
-    // org.apache.phoenix.parse.DivideParseNode
+    // org.apache.phoenix.parse.ArrayAllAnyComparisonNode
+    string type = 4;
+    // org.apache.phoenix.parse.ArrayAllComparisonNode
 }
 
 message P_BinaryParseNode {
     oneof inherit {
-        LessThanOrEqualParseNode LessThanOrEqualParseNode = 1;
-        NotEqualParseNode NotEqualParseNode = 2;
-        EqualParseNode EqualParseNode = 3;
-        LessThanParseNode LessThanParseNode = 4;
-        GreaterThanParseNode GreaterThanParseNode = 5;
+        EqualParseNode EqualParseNode = 1;
+        LessThanParseNode LessThanParseNode = 2;
+        GreaterThanParseNode GreaterThanParseNode = 3;
+        NotEqualParseNode NotEqualParseNode = 4;
+        LessThanOrEqualParseNode LessThanOrEqualParseNode = 5;
         GreaterThanOrEqualParseNode GreaterThanOrEqualParseNode = 6;
-        InParseNode InParseNode = 7;
-        LikeParseNode LikeParseNode = 8;
+        LikeParseNode LikeParseNode = 7;
+        InParseNode InParseNode = 8;
     }
 }
 
 message P_ComparisonParseNode {
     oneof inherit {
-        LessThanOrEqualParseNode LessThanOrEqualParseNode = 1;
-        NotEqualParseNode NotEqualParseNode = 2;
-        EqualParseNode EqualParseNode = 3;
-        LessThanParseNode LessThanParseNode = 4;
-        GreaterThanParseNode GreaterThanParseNode = 5;
+        EqualParseNode EqualParseNode = 1;
+        LessThanParseNode LessThanParseNode = 2;
+        GreaterThanParseNode GreaterThanParseNode = 3;
+        NotEqualParseNode NotEqualParseNode = 4;
+        LessThanOrEqualParseNode LessThanOrEqualParseNode = 5;
         GreaterThanOrEqualParseNode GreaterThanOrEqualParseNode = 6;
     }
-}
-
-message LessThanOrEqualParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.BinaryParseNode
-    // org.apache.phoenix.parse.ComparisonParseNode
-    CompareOp filterOp = 4;
-    CompareOp invertFilterOp = 5;
-    // org.apache.phoenix.parse.LessThanOrEqualParseNode
-}
-
-message NotEqualParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.BinaryParseNode
-    // org.apache.phoenix.parse.ComparisonParseNode
-    CompareOp filterOp = 4;
-    CompareOp invertFilterOp = 5;
-    // org.apache.phoenix.parse.NotEqualParseNode
 }
 
 message EqualParseNode {
@@ -1496,6 +1358,32 @@ message GreaterThanParseNode {
     // org.apache.phoenix.parse.GreaterThanParseNode
 }
 
+message NotEqualParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.BinaryParseNode
+    // org.apache.phoenix.parse.ComparisonParseNode
+    CompareOp filterOp = 4;
+    CompareOp invertFilterOp = 5;
+    // org.apache.phoenix.parse.NotEqualParseNode
+}
+
+message LessThanOrEqualParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.BinaryParseNode
+    // org.apache.phoenix.parse.ComparisonParseNode
+    CompareOp filterOp = 4;
+    CompareOp invertFilterOp = 5;
+    // org.apache.phoenix.parse.LessThanOrEqualParseNode
+}
+
 message GreaterThanOrEqualParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
@@ -1507,18 +1395,6 @@ message GreaterThanOrEqualParseNode {
     CompareOp filterOp = 4;
     CompareOp invertFilterOp = 5;
     // org.apache.phoenix.parse.GreaterThanOrEqualParseNode
-}
-
-message InParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.BinaryParseNode
-    // org.apache.phoenix.parse.InParseNode
-    bool isNegate = 4;
-    bool isSubqueryDistinct = 5;
 }
 
 message LikeParseNode {
@@ -1533,42 +1409,16 @@ message LikeParseNode {
     bool isNegate = 5;
 }
 
-message OrParseNode {
+message InParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
     repeated P_ParseNode children = 2;
     bool isStateless = 3;
     // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.OrParseNode
-}
-
-message P_ArrayAllAnyComparisonNode {
-    oneof inherit {
-        ArrayAnyComparisonNode ArrayAnyComparisonNode = 1;
-        ArrayAllComparisonNode ArrayAllComparisonNode = 2;
-    }
-}
-
-message ArrayAnyComparisonNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.ArrayAllAnyComparisonNode
-    string type = 4;
-    // org.apache.phoenix.parse.ArrayAnyComparisonNode
-}
-
-message ArrayAllComparisonNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.ArrayAllAnyComparisonNode
-    string type = 4;
-    // org.apache.phoenix.parse.ArrayAllComparisonNode
+    // org.apache.phoenix.parse.BinaryParseNode
+    // org.apache.phoenix.parse.InParseNode
+    bool isNegate = 4;
+    bool isSubqueryDistinct = 5;
 }
 
 message ArrayElemRefNode {
@@ -1580,34 +1430,13 @@ message ArrayElemRefNode {
     // org.apache.phoenix.parse.ArrayElemRefNode
 }
 
-message InListParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.InListParseNode
-    bool isNegate = 4;
-}
-
 message P_UnaryParseNode {
     oneof inherit {
-        ExistsParseNode ExistsParseNode = 1;
-        NotParseNode NotParseNode = 2;
-        IsNullParseNode IsNullParseNode = 3;
-        CastParseNode CastParseNode = 4;
+        NotParseNode NotParseNode = 1;
+        IsNullParseNode IsNullParseNode = 2;
+        CastParseNode CastParseNode = 3;
+        ExistsParseNode ExistsParseNode = 4;
     }
-}
-
-message ExistsParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.UnaryParseNode
-    // org.apache.phoenix.parse.ExistsParseNode
-    bool isNegate = 4;
 }
 
 message NotParseNode {
@@ -1644,22 +1473,34 @@ message CastParseNode {
     int32 scale = 6;
 }
 
-message RowValueConstructorParseNode {
+message ExistsParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
     repeated P_ParseNode children = 2;
     bool isStateless = 3;
     // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.RowValueConstructorParseNode
+    // org.apache.phoenix.parse.UnaryParseNode
+    // org.apache.phoenix.parse.ExistsParseNode
+    bool isNegate = 4;
 }
 
-message ArrayConstructorNode {
+message OrParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
     repeated P_ParseNode children = 2;
     bool isStateless = 3;
     // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.ArrayConstructorNode
+    // org.apache.phoenix.parse.OrParseNode
+}
+
+message InListParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.InListParseNode
+    bool isNegate = 4;
 }
 
 message AndParseNode {
@@ -1671,6 +1512,89 @@ message AndParseNode {
     // org.apache.phoenix.parse.AndParseNode
 }
 
+message P_ArithmeticParseNode {
+    oneof inherit {
+        SubtractParseNode SubtractParseNode = 1;
+        ModulusParseNode ModulusParseNode = 2;
+        MultiplyParseNode MultiplyParseNode = 3;
+        AddParseNode AddParseNode = 4;
+        DivideParseNode DivideParseNode = 5;
+    }
+}
+
+message SubtractParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.ArithmeticParseNode
+    string operator = 4;
+    // org.apache.phoenix.parse.SubtractParseNode
+}
+
+message ModulusParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.ArithmeticParseNode
+    string operator = 4;
+    // org.apache.phoenix.parse.ModulusParseNode
+}
+
+message MultiplyParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.ArithmeticParseNode
+    string operator = 4;
+    // org.apache.phoenix.parse.MultiplyParseNode
+}
+
+message AddParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.ArithmeticParseNode
+    string operator = 4;
+    // org.apache.phoenix.parse.AddParseNode
+}
+
+message DivideParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.ArithmeticParseNode
+    string operator = 4;
+    // org.apache.phoenix.parse.DivideParseNode
+}
+
+message ArrayConstructorNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.ArrayConstructorNode
+}
+
+message StringConcatParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.CompoundParseNode
+    // org.apache.phoenix.parse.StringConcatParseNode
+}
+
 message CaseParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
@@ -1680,84 +1604,26 @@ message CaseParseNode {
     // org.apache.phoenix.parse.CaseParseNode
 }
 
-message BetweenParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.CompoundParseNode
-    // org.apache.phoenix.parse.BetweenParseNode
-    bool isNegate = 4;
-}
-
 message P_TerminalParseNode {
     oneof inherit {
-        SubqueryParseNode SubqueryParseNode = 1;
-        WildcardParseNode WildcardParseNode = 2;
+        ColumnParseNode ColumnParseNode = 1;
+        TableWildcardParseNode TableWildcardParseNode = 2;
         BindParseNode BindParseNode = 3;
-        TableWildcardParseNode TableWildcardParseNode = 4;
-        ColumnParseNode ColumnParseNode = 5;
-        FamilyWildcardParseNode FamilyWildcardParseNode = 6;
-        SequenceValueParseNode SequenceValueParseNode = 7;
-        LiteralParseNode LiteralParseNode = 8;
+        FamilyWildcardParseNode FamilyWildcardParseNode = 4;
+        SequenceValueParseNode SequenceValueParseNode = 5;
+        SubqueryParseNode SubqueryParseNode = 6;
+        LiteralParseNode LiteralParseNode = 7;
+        WildcardParseNode WildcardParseNode = 8;
     }
-}
-
-message SubqueryParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.TerminalParseNode
-    // org.apache.phoenix.parse.SubqueryParseNode
-    bool expectSingleRow = 4;
-    SelectStatement selectNode = 5;
-}
-
-message WildcardParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.TerminalParseNode
-    // org.apache.phoenix.parse.WildcardParseNode
-    bool isRewrite = 4;
 }
 
 message P_NamedParseNode {
     oneof inherit {
-        BindParseNode BindParseNode = 1;
+        ColumnParseNode ColumnParseNode = 1;
         TableWildcardParseNode TableWildcardParseNode = 2;
-        ColumnParseNode ColumnParseNode = 3;
+        BindParseNode BindParseNode = 3;
         FamilyWildcardParseNode FamilyWildcardParseNode = 4;
     }
-}
-
-message BindParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.TerminalParseNode
-    // org.apache.phoenix.parse.NamedParseNode
-    string name = 4;
-    bool isCaseSensitive = 5;
-    // org.apache.phoenix.parse.BindParseNode
-    int32 index = 6;
-}
-
-message TableWildcardParseNode {
-    // org.apache.phoenix.parse.ParseNode
-    string alias = 1;
-    repeated P_ParseNode children = 2;
-    bool isStateless = 3;
-    // org.apache.phoenix.parse.TerminalParseNode
-    // org.apache.phoenix.parse.NamedParseNode
-    string name = 4;
-    bool isCaseSensitive = 5;
-    // org.apache.phoenix.parse.TableWildcardParseNode
-    TableName tableName = 6;
-    bool isRewrite = 7;
 }
 
 message ColumnParseNode {
@@ -1774,6 +1640,33 @@ message ColumnParseNode {
     string schemaName = 7;
     string tableName = 8;
     bool isTableNameCaseSensitive = 9;
+}
+
+message TableWildcardParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.TerminalParseNode
+    // org.apache.phoenix.parse.NamedParseNode
+    string name = 4;
+    bool isCaseSensitive = 5;
+    // org.apache.phoenix.parse.TableWildcardParseNode
+    TableName tableName = 6;
+    bool isRewrite = 7;
+}
+
+message BindParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.TerminalParseNode
+    // org.apache.phoenix.parse.NamedParseNode
+    string name = 4;
+    bool isCaseSensitive = 5;
+    // org.apache.phoenix.parse.BindParseNode
+    int32 index = 6;
 }
 
 message FamilyWildcardParseNode {
@@ -1801,6 +1694,17 @@ message SequenceValueParseNode {
     TableName tableName = 6;
 }
 
+message SubqueryParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.TerminalParseNode
+    // org.apache.phoenix.parse.SubqueryParseNode
+    bool expectSingleRow = 4;
+    SelectStatement selectNode = 5;
+}
+
 message LiteralParseNode {
     // org.apache.phoenix.parse.ParseNode
     string alias = 1;
@@ -1810,6 +1714,139 @@ message LiteralParseNode {
     // org.apache.phoenix.parse.LiteralParseNode
     PDataType type = 4;
     string value = 5;
+}
+
+message WildcardParseNode {
+    // org.apache.phoenix.parse.ParseNode
+    string alias = 1;
+    repeated P_ParseNode children = 2;
+    bool isStateless = 3;
+    // org.apache.phoenix.parse.TerminalParseNode
+    // org.apache.phoenix.parse.WildcardParseNode
+    bool isRewrite = 4;
+}
+
+message P_NamedNode {
+    oneof inherit {
+        NamedNode NamedNode = 1;
+        PrimaryKeyConstraint PrimaryKeyConstraint = 2;
+    }
+}
+
+message NamedNode {
+    // org.apache.phoenix.parse.NamedNode
+    string name = 1;
+    bool isCaseSensitive = 2;
+}
+
+message PrimaryKeyConstraint {
+    message Pair_ColumnName_SortOrder {
+        ColumnName first = 1;
+        SortOrder second = 2;
+    }
+
+    // org.apache.phoenix.parse.NamedNode
+    string name = 1;
+    bool isCaseSensitive = 2;
+    // org.apache.phoenix.parse.PrimaryKeyConstraint
+    repeated Pair_ColumnName_SortOrder columnNames = 3;
+    int32 numColumnsWithRowTimestamp = 4;
+}
+
+message IndexKeyConstraint {
+    message Pair_ParseNode_SortOrder {
+        P_ParseNode first = 1;
+        SortOrder second = 2;
+    }
+
+    // org.apache.phoenix.parse.IndexKeyConstraint
+    repeated Pair_ParseNode_SortOrder parseNodeAndSortOrderList = 1;
+}
+
+message CursorName {
+    // org.apache.phoenix.parse.CursorName
+    string name = 1;
+    bool isCaseSensitive = 2;
+}
+
+message LimitNode {
+    // org.apache.phoenix.parse.LimitNode
+    P_ParseNode limitParseNode = 1;
+}
+
+message P_TableNode {
+    oneof inherit {
+        JoinTableNode JoinTableNode = 1;
+        DerivedTableNode DerivedTableNode = 2;
+        BindTableNode BindTableNode = 3;
+        NamedTableNode NamedTableNode = 4;
+    }
+}
+
+message JoinTableNode {
+    // org.apache.phoenix.parse.TableNode
+    string alias = 1;
+    // org.apache.phoenix.parse.JoinTableNode
+    P_TableNode lHS = 2;
+    P_ParseNode onNode = 3;
+    P_TableNode rHS = 4;
+    JoinType type = 5;
+    bool isSingleValueOnly = 6;
+}
+
+message DerivedTableNode {
+    // org.apache.phoenix.parse.TableNode
+    string alias = 1;
+    // org.apache.phoenix.parse.DerivedTableNode
+    SelectStatement select = 2;
+}
+
+message P_ConcreteTableNode {
+    oneof inherit {
+        BindTableNode BindTableNode = 1;
+        NamedTableNode NamedTableNode = 2;
+    }
+}
+
+message BindTableNode {
+    // org.apache.phoenix.parse.TableNode
+    string alias = 1;
+    // org.apache.phoenix.parse.ConcreteTableNode
+    TableName name = 2;
+    double tableSamplingRate = 3;
+    // org.apache.phoenix.parse.BindTableNode
+}
+
+message NamedTableNode {
+    // org.apache.phoenix.parse.TableNode
+    string alias = 1;
+    // org.apache.phoenix.parse.ConcreteTableNode
+    TableName name = 2;
+    double tableSamplingRate = 3;
+    // org.apache.phoenix.parse.NamedTableNode
+    repeated ColumnDef dynamicColumns = 4;
+}
+
+message OffsetNode {
+    // org.apache.phoenix.parse.OffsetNode
+    P_ParseNode offsetParseNode = 1;
+}
+
+message ColumnName {
+    // org.apache.phoenix.parse.ColumnName
+    P_NamedNode columnNode = 1;
+    P_NamedNode familyNode = 2;
+}
+
+message FunctionArgument {
+    // org.apache.phoenix.parse.PFunction$FunctionArgument
+    int32 argPosition = 1;
+    string argumentType = 2;
+    string defaultValue = 3;
+    string maxValue = 4;
+    string minValue = 5;
+    bool isArrayType = 6;
+    bool isConstant = 7;
 }
 
 message TableName {
