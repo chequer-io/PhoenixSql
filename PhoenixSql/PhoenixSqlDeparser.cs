@@ -139,7 +139,7 @@ namespace PhoenixSql
                 writer.WriteSpace();
             }
 
-            writer.Write("*/ ");
+            writer.Write("*/");
         }
 
         private static void DeparseColumnDef(ScriptWriter writer, ColumnDef node)
@@ -405,7 +405,34 @@ namespace PhoenixSql
 
         private static void DeparseDeleteStatement(ScriptWriter writer, DeleteStatement node)
         {
-            throw new NotImplementedException();
+            writer.Write("DELETE ");
+
+            if (node.Hint != null)
+            {
+                DeparseHintNode(writer, node.Hint);
+                writer.WriteSpace();
+            }
+
+            writer.Write("FROM ");
+            DeparseNamedTableNode(writer, node.Table);
+
+            if (node.Where != null)
+            {
+                writer.WriteSpace().Write("WHERE ");
+                DeparseParseNode(writer, node.Where);
+            }
+
+            if (node.OrderBy.Count > 0)
+            {
+                writer.WriteSpace().Write("ORDER BY ");
+                writer.WriteJoin(", ", node.OrderBy, DeparseOrderByNode);
+            }
+
+            if (node.Limit != null)
+            {
+                writer.WriteSpace().Write("LIMIT ");
+                DeparseLimitNode(writer, node.Limit);
+            }
         }
 
         private static void DeparseUpsertStatement(ScriptWriter writer, UpsertStatement node)
