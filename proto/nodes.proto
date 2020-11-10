@@ -339,6 +339,7 @@ message UpsertStatement {
     repeated Pair_ColumnName_ParseNode onDupKeyPairs = 6;
     SelectStatement select = 7;
     repeated P_ParseNode values = 8;
+    bool onDupKeyIgnore = 9;
 }
 
 message UpdateStatisticsStatement {

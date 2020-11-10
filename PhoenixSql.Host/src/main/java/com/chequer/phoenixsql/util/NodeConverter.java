@@ -61,6 +61,8 @@ public class NodeConverter {
             builder.setDeleteStatement(convert((DeleteStatement) value));
         } else if (value instanceof UpsertStatement) {
             builder.setUpsertStatement(convert((UpsertStatement) value));
+        } else if (value instanceof DMLStatement) {
+            builder.setDMLStatement(convertDefault((DMLStatement) value));
         }
 
         return builder;
@@ -157,6 +159,8 @@ public class NodeConverter {
             builder.setAggregateFunctionWithinGroupParseNode(convert((AggregateFunctionWithinGroupParseNode) value));
         } else if (value instanceof AvgAggregateParseNode) {
             builder.setAvgAggregateParseNode(convert((AvgAggregateParseNode) value));
+        } else if (value instanceof AggregateFunctionParseNode) {
+            builder.setAggregateFunctionParseNode(convertDefault((AggregateFunctionParseNode) value));
         }
 
         return builder;
@@ -671,6 +675,8 @@ public class NodeConverter {
             builder.setToCharParseNode(convert((ToCharParseNode) value));
         } else if (value instanceof AggregateFunctionParseNode) {
             builder.setAggregateFunctionParseNode(convertDefault((AggregateFunctionParseNode) value));
+        } else if (value instanceof FunctionParseNode) {
+            builder.setFunctionParseNode(convertDefault((FunctionParseNode) value));
         }
 
         return builder;
@@ -2070,6 +2076,8 @@ public class NodeConverter {
 
         if (value instanceof PrimaryKeyConstraint) {
             builder.setPrimaryKeyConstraint(convert((PrimaryKeyConstraint) value));
+        } else if (value instanceof NamedNode) {
+            builder.setNamedNode(convertDefault((NamedNode) value));
         }
 
         return builder;
@@ -2460,10 +2468,18 @@ public class NodeConverter {
         addAll(value.getColumns(), NodeConverter::convert, builder::addColumns);
         var v2 = value.getHint();
         if (v2 != null && !v2.isEmpty()) builder.setHint(convert(v2));
-        addAll(value.getOnDupKeyPairs(), NodeConverter::convertPairColumnNameParseNode, builder::addOnDupKeyPairs);
-        var v3 = value.getSelect();
-        if (v3 != null) builder.setSelect(convert(v3));
+        var v3 = value.getOnDupKeyPairs();
+        if (v3 != null) {
+            if (v3.size() == 0) {
+                builder.setOnDupKeyIgnore(true);
+            } else {
+                addAll(v3, NodeConverter::convertPairColumnNameParseNode, builder::addOnDupKeyPairs);
+            }
+        }
+        var v4 = value.getSelect();
+        if (v4 != null) builder.setSelect(convert(v4));
         addAll(value.getValues(), NodeConverter::convert, builder::addValues);
+
 
         return builder;
     }

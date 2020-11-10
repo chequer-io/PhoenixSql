@@ -435,7 +435,7 @@ public class Main {
                     var defaultFields = new ArrayList<Pair<ProtoField, Integer>>();
                     boolean write = false;
 
-                    for (int i = hasFallback ? 1 : 0; i < fields.size(); i++) {
+                    for (int i = 0; i < fields.size(); i++) {
                         var field = fields.get(i);
 
                         var defaultData = data.convertDefaultFields.getOrDefault(field, null);
@@ -444,9 +444,6 @@ public class Main {
                             int distance = getInheritDistance(defaultData.type, data.type);
                             assert distance >= 0;
 
-                            if (defaultData.type == TypeInfo.get(AggregateFunctionParseNode.class)) {
-                                System.out.println("AggregateFunctionParseNode");
-                            }
                             defaultFields.add(new Pair<>(field, distance));
 
                             continue;
@@ -647,16 +644,24 @@ public class Main {
                                 .replace("[Body]", pairConvertBody.toString()));
                     }
 
-                    var needConvert = toRpcConvertTypes.contains(elementType.unwrap()) || generateData.containsKey(elementType);
+                    if (typeNode.typeInfo == TypeInfo.get(UpsertStatement.class) && inheritProperty.getName().equals("getOnDupKeyPairs")) {
+                        var variableName = "v" + ++variable;
 
-                    if (needConvert) {
+                        body.append(indent).append(String.format("var %s = value.getOnDupKeyPairs();\n", variableName));
+                        body.append(indent).append(String.format("if (%s != null) {\n", variableName));
+                        body.append(indent).append(indent1).append(String.format("if (%s.size() == 0) {\n", variableName));
+                        body.append(indent).append(indent2).append(String.format("%s.setOnDupKeyIgnore(true);\n", builderName));
+                        body.append(indent).append(indent1).append("} else {\n");
+                        body.append(indent).append(indent2).append(String.format("addAll(%s, NodeConverter::convertPairColumnNameParseNode, %s::addOnDupKeyPairs);\n", variableName, builderName));
+                        body.append(indent).append(indent1).append("}\n");
+                        body.append(indent).append("}");
+                    } else if (toRpcConvertTypes.contains(elementType.unwrap()) || generateData.containsKey(elementType)) {
                         body.append(indent).append(String.format("addAll(value.%s(), NodeConverter::%s, %s::add%s);", inheritProperty.getName(), converterName, builderName, protoMethodName));
                     } else {
                         throw new Exception();
                     }
                 } else if (returnType == TypeInfo.get(HintNode.class)) {
                     var variableName = "v" + ++variable;
-
                     body.append(indent).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
                     body.append(indent).append(String.format("if (%s != null && !%s.isEmpty()) %s.set%s(convert(%s));", variableName, variableName, builderName, protoMethodName, variableName));
                 } else if (returnType == TypeInfo.get(Object.class) && inheritData.type == TypeInfo.get(LiteralParseNode.class)) {
@@ -666,12 +671,10 @@ public class Main {
                     body.append(indent).append(String.format("%s.set%s(%s.toString());", builderName, protoMethodName, variableName));
                 } else if (toRpcConvertTypes.contains(returnType.unwrap()) || generateData.containsKey(returnType)) {
                     var variableName = "v" + ++variable;
-
                     body.append(indent).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
                     body.append(indent).append(String.format("if (%s != null) %s.set%s(convert(%s));", variableName, builderName, protoMethodName, variableName));
                 } else if (!returnType.unwrap().isPrimitive()) {
                     var variableName = "v" + ++variable;
-
                     body.append(indent).append(String.format("var %s = value.%s();\n", variableName, inheritProperty.getName()));
                     body.append(indent).append(String.format("if (%s != null) %s.set%s(%s);", variableName, builderName, protoMethodName, variableName));
                 } else {
@@ -777,6 +780,10 @@ public class Main {
 
                     for (final var protoField : protoMembers) {
                         data.absMessage.add(protoField);
+                    }
+
+                    if (data.type == TypeInfo.get(UpsertStatement.class)) {
+                        data.absMessage.add(new ProtoField("onDupKeyIgnore", ProtoScalaType.BOOL));
                     }
 
                     for (final var inheritData : getInheritMap(node, false)) {
