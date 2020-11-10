@@ -594,6 +594,12 @@ public class Main {
         for (final var inheritData : map) {
             for (final var inheritProperty : inheritData.javaProperties) {
                 index++;
+
+                if (typeNode.typeInfo == TypeInfo.get(DeleteStatement.class) &&
+                        inheritProperty.getName().equals("getTableSamplingRate")) {
+                    continue;
+                }
+
                 var protoField = fields.get(index);
                 var returnType = inheritProperty.getReturnType();
                 var protoMethodName = toPascalCase(protoField.getName());

@@ -1213,10 +1213,8 @@ public class NodeConverter {
         var v4 = value.getOffset();
         if (v4 != null) builder.setOffset(convert(v4));
         addAll(value.getOrderBy(), NodeConverter::convert, builder::addOrderBy);
-        var v5 = value.getTableSamplingRate();
-        if (v5 != null) builder.setTableSamplingRate(v5);
-        var v6 = value.getWhere();
-        if (v6 != null) builder.setWhere(convert(v6));
+        var v5 = value.getWhere();
+        if (v5 != null) builder.setWhere(convert(v5));
         builder.setIsAggregate(value.isAggregate());
         builder.setIsDistinct(value.isDistinct());
 
