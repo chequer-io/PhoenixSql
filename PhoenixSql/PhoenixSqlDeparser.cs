@@ -437,7 +437,54 @@ namespace PhoenixSql
 
         private static void DeparseUpsertStatement(ScriptWriter writer, UpsertStatement node)
         {
-            throw new NotImplementedException();
+            writer.Write("UPSERT ");
+
+            if (node.Hint != null)
+            {
+                DeparseHintNode(writer, node.Hint);
+                writer.WriteSpace();
+            }
+
+            writer.Write("INTO ");
+            DeparseNamedTableNode(writer, node.Table);
+
+            if (node.Columns.Count > 0)
+            {
+                writer.Write('(');
+                writer.WriteJoin(", ", node.Columns, DeparseColumnName);
+                writer.Write(')');
+            }
+
+            if (node.Values.Count > 0)
+            {
+                writer.WriteSpace();
+                writer.Write("VALUES (");
+                writer.WriteJoin(", ", node.Values, DeparseParseNode);
+                writer.Write(')');
+            }
+            else if (node.Select != null)
+            {
+                writer.WriteSpace();
+                DeparseSelectStatement(writer, node.Select);
+            }
+
+            if (node.OnDupKeyIgnore)
+            {
+                writer.WriteSpace();
+                writer.Write("ON DUPLICATE KEY IGNORE");
+            }
+            else if (node.OnDupKeyPairs.Count > 0)
+            {
+                writer.WriteSpace();
+                writer.Write("ON DUPLICATE KEY UPDATE ");
+
+                writer.WriteJoin(", ", node.OnDupKeyPairs, (w, pair) =>
+                {
+                    DeparseColumnName(w, pair.First);
+                    w.WriteSpace().Write("=").WriteSpace();
+                    DeparseParseNode(w, pair.Second);
+                });
+            }
         }
 
         private static void DeparseAlterIndexStatement(ScriptWriter writer, AlterIndexStatement node)
