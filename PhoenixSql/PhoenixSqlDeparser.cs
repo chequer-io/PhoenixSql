@@ -1546,6 +1546,7 @@ namespace PhoenixSql
         private static void DeparseFamilyWildcardParseNode(ScriptWriter writer, FamilyWildcardParseNode node)
         {
             WriteIdentifier(writer, node.Name, node.IsCaseSensitive);
+            writer.Write(".*");
         }
 
         private static void DeparseBindParseNode(ScriptWriter writer, BindParseNode node)
