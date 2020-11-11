@@ -1481,7 +1481,7 @@ namespace PhoenixSql
         private static void DeparseSequenceValueParseNode(ScriptWriter writer, SequenceValueParseNode node)
         {
             writer.Write(node.Op == Op.CurrentValue ? "CURRENT" : "NEXT");
-            writer.Write(" VALUE FORE ");
+            writer.Write(" VALUE FOR ");
             DeparseTableName(writer, node.TableName);
         }
 
