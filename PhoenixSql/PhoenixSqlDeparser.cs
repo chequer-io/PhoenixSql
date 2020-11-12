@@ -11,7 +11,7 @@ namespace PhoenixSql
 {
     public static class PhoenixSqlDeparser
     {
-        private static readonly Regex _namePattern = new Regex(@"^[A-Z_][A-Z\d_]*$");
+        private static readonly Regex _namePattern = new Regex(@"^[A-Z][A-Z\d_\u0080-\u2001\u2003-\ufffe]*$");
 
         public static string Deparse(IPhoenixNode node)
         {
@@ -1585,7 +1585,8 @@ namespace PhoenixSql
 
         private static void WriteAlias(ScriptWriter writer, string alias)
         {
-            WriteIdentifier(writer, alias, !_namePattern.IsMatch(alias));
+            var caseSensitive = !_namePattern.IsMatch(alias) || alias.Any(char.IsLower);
+            WriteIdentifier(writer, alias, caseSensitive);
         }
 
         // (2)
