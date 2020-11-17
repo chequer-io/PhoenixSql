@@ -31,8 +31,15 @@ namespace PhoenixSql.Sample
                     var statement = PhoenixSqlParser.Parse(sql);
                     sw.Stop();
 
-                    Console.ForegroundColor = ConsoleColor.DarkCyan;
-                    Console.WriteLine($"Deparse : {PhoenixSqlDeparser.Deparse(statement)}");
+                    try
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkCyan;
+                        Console.WriteLine($"Deparse : {PhoenixSqlDeparser.Deparse(statement)}");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
 
                     Console.ForegroundColor = ConsoleColor.Magenta;
                     Console.WriteLine($"Parsed in {sw.Elapsed.TotalMilliseconds:0.00} ms");

@@ -144,13 +144,37 @@ namespace PhoenixSql
 
         private static void DeparseColumnDef(ScriptWriter writer, ColumnDef node)
         {
+            var dataType = node.IsArray ? node.DataType.GetElementType() : node.DataType;
+
             DeparseNamedNode(writer, node.ColumnDefName.ColumnNode);
             writer.Write(' ');
-            writer.Write(node.DataType.ToSqlTypeName());
+            writer.Write(dataType.ToSqlTypeName());
             WriteTypeSize(writer, node.MaxLength, node.Scale);
 
             if (node.IsArray)
-                writer.Write(" ARRAY ");
+            {
+                writer.Write(" ARRAY");
+
+                if (node.ArraySize > 0)
+                    writer.Write($"[{node.ArraySize}]");
+            }
+
+            if (!node.IsNull)
+                writer.Write(" NOT NULL");
+
+            if (!string.IsNullOrEmpty(node.Expression))
+                writer.Write($" DEFAULT {node.Expression}");
+
+            if (node.IsPK)
+            {
+                writer.Write(" PRIMARY KEY");
+
+                if (node.SortOrder == SortOrder.Desc)
+                    writer.Write(" DESC");
+
+                if (node.IsRowTimestamp)
+                    writer.Write(" ROW_TIMESTAMP");
+            }
         }
 
         #region IBindableStatement
@@ -529,7 +553,63 @@ namespace PhoenixSql
 
         private static void DeparseCreateTableStatement(ScriptWriter writer, CreateTableStatement node)
         {
-            throw new NotSupportedException();
+            if (node.TableType != PTableType.View)
+                throw new NotSupportedException();
+
+            DeparseCreateViewStatement(writer, node);
+        }
+
+        private static void DeparseCreateViewStatement(ScriptWriter writer, CreateTableStatement node)
+        {
+            writer.Write("CREATE VIEW ");
+
+            if (node.IfNotExists)
+                writer.Write("IF NOT EXISTS ");
+
+            DeparseTableName(writer, node.TableName);
+
+            var hasConstraint = node.PrimaryKeyConstraint?.ColumnNames?.Count > 0;
+
+            if (node.ColumnDefs.Any() || hasConstraint)
+            {
+                writer.Write(" (");
+                writer.WriteJoin(", ", node.ColumnDefs, DeparseColumnDef);
+
+                if (hasConstraint)
+                {
+                    writer.WriteSpace();
+                    writer.Write("CONSTRAINT ");
+                    writer.Write(node.PrimaryKeyConstraint.Name);
+                    writer.Write(" PRIMARY KEY (");
+                    writer.WriteJoin(", ", node.PrimaryKeyConstraint.ColumnNames, DeparsePairColumnNameSortOrder);
+                    writer.Write(')');
+                }
+
+                writer.Write(')');
+            }
+
+            if (node.BaseTableName != null && (!node.BaseTableName.Equals(node.TableName) || node.WhereClause != null))
+            {
+                writer.Write(" AS SELECT * FROM ");
+                DeparseTableName(writer, node.BaseTableName);
+
+                if (node.WhereClause != null)
+                {
+                    writer.Write(" WHERE ");
+                    DeparseParseNode(writer, node.WhereClause);
+                }
+            }
+        }
+
+        private static void DeparsePairColumnNameSortOrder(ScriptWriter writer, PrimaryKeyConstraint.Types.Pair_ColumnName_SortOrder node)
+        {
+            DeparseColumnName(writer, node.First);
+
+            if (node.Second == SortOrder.Desc)
+            {
+                writer.WriteSpace();
+                writer.Write("DESC");
+            }
         }
 
         private static void DeparseAddJarsStatement(ScriptWriter writer, AddJarsStatement node)
