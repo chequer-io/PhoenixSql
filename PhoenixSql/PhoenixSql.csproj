@@ -13,12 +13,12 @@
         <RepositoryUrl>https://github.com/chequer-io/PhoenixSql</RepositoryUrl>
         <PackageProjectUrl>https://github.com/chequer-io/PhoenixSql</PackageProjectUrl>
         <PackageIcon>Logo.png</PackageIcon>
-        <Version>1.0.7</Version>
+        <Version>1.0.8</Version>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Google.Protobuf" Version="3.10.1" />
-        <PackageReference Include="Grpc" Version="2.24.0" />
+        <PackageReference Include="Google.Protobuf" Version="3.10.1"/>
+        <PackageReference Include="Grpc" Version="2.24.0"/>
         <PackageReference Include="Grpc.Tools" Version="2.24.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -36,15 +36,22 @@
             <PackagePath>lib</PackagePath>
         </None>
 
-        <None Include="PhoenixSql.props">
+        <None Include="PhoenixSql.targets">
             <Pack>True</Pack>
             <Visible>False</Visible>
             <PackagePath>build</PackagePath>
         </None>
 
-        <None Include="..\LICENSE" PackagePath="" Pack="True" />
-        <None Include="..\Logo.png" PackagePath="" Pack="True" />
+        <None Include="..\LICENSE">
+            <Pack>True</Pack>
+            <PackagePath/>
+        </None>
+
+        <None Include="..\Logo.png">
+            <Pack>True</Pack>
+            <PackagePath/>
+        </None>
     </ItemGroup>
 
-    <Import Project="J2NET.props" />
+    <Import Project="J2NET.props"/>
 </Project>

@@ -2,20 +2,22 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
 using J2NET.Exceptions;
-using J2NET.Utilities;
 using PhoenixSql.Services;
+using PhoenixSql.Utilities;
 
 namespace PhoenixSql.Internal
 {
     internal class PhoenixSqlParserHost
     {
-        private const string hostLibrary = "lib/PhoenixSql.Host-1.0-SNAPSHOT-jar-with-dependencies.jar";
+        private const string hostLibrary = "PhoenixSql.Host.jar";
+
+        private string _javaRuntimePath;
+        private string _hostLibraryPath;
 
         private Process _hostProcess;
         private Server _handshakeServer;
@@ -103,8 +105,8 @@ namespace PhoenixSql.Internal
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = PathUtility.GetRuntimePath(),
-                    Arguments = $"-jar {hostLibrary} {boundPort}",
+                    FileName = _javaRuntimePath,
+                    Arguments = $"-jar {_hostLibraryPath} {boundPort}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true
@@ -199,16 +201,15 @@ namespace PhoenixSql.Internal
 
         private void VerifyHostLibrary()
         {
-            if (!File.Exists(hostLibrary))
+            _hostLibraryPath = PathUtility.Find(hostLibrary);
+
+            if (!File.Exists(_hostLibraryPath))
                 throw new PhoenixSqlHostException($"{hostLibrary} not found.");
         }
 
         private void VerifyJavaRuntime()
         {
-            var runtimePath = PathUtility.GetRuntimePath();
-
-            if (!Directory.Exists(Path.GetDirectoryName(runtimePath)))
-                throw new RuntimeNotFoundException();
+            _javaRuntimePath = PathUtility.GetJavaRuntimePath();
         }
 
         public IBindableStatement Parse(string sql)

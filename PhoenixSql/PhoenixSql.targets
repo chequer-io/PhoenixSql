@@ -1,0 +1,20 @@
+<Project>
+
+    <ItemGroup>
+        <JarFile Include="$(MSBuildThisFileDirectory)..\lib\PhoenixSql.Host-1.0-SNAPSHOT-jar-with-dependencies.jar" />
+    </ItemGroup>
+
+    <Target Name="PhoenixSql_PreBuildEvent" BeforeTargets="PreBuildEvent">
+        <Copy SourceFiles="@(JarFile)" DestinationFiles="$(OutputPath)\PhoenixSql.Host.jar" SkipUnchangedFiles="true" />
+    </Target>
+
+    <Target Name="PhoenixSql_ComputeFilesToPublish" AfterTargets="ComputeFilesToPublish">
+        <ItemGroup>
+            <ResolvedFileToPublish Include="@(JarFile->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+                <RelativePath>PhoenixSql.Host.jar</RelativePath>
+                <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+            </ResolvedFileToPublish>
+        </ItemGroup>
+    </Target>
+
+</Project>
