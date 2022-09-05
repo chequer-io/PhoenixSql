@@ -51,24 +51,28 @@ jobs:
         # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
 
-    - name: Setup .NET
+    - if: ${{ matrix.language == 'csharp' }}
+      name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: '6.0.x'
 
-    - name: Setup Java
-      uses: actions/setup-java@v3
-      with:
-        java-version: '11'
-        distribution: 'adopt'
-
-    - name: Build .NET
+    - if: ${{ matrix.language == 'csharp' }}
+      name: Build .NET
       working-directory: PhoenixSql
       run: dotnet build -c Release
 
-    - name: Build Java
+    - if: ${{ matrix.language == 'java' }}
+      name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '16'
+        distribution: 'adopt'
+
+    - if: ${{ matrix.language == 'java' }}
+      name: Build Java
       working-directory: PhoenixSql.Host
-      run: mvn compile
+      run: mvn pacakge
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
