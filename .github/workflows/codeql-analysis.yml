@@ -62,18 +62,19 @@ jobs:
       working-directory: PhoenixSql
       run: dotnet build -c Release
 
-# ISSUE: maven-default-http-blocker (http //0.0.0.0/) blocked mirror for repositories
-#     - if: ${{ matrix.language == 'java' }}
-#       name: Setup Java
-#       uses: actions/setup-java@v3
-#       with:
-#         java-version: '16'
-#         distribution: 'adopt'
+    - if: ${{ matrix.language == 'java' }}
+      name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '16'
+        distribution: 'adopt'
 
-#     - if: ${{ matrix.language == 'java' }}
-#       name: Build Java
-#       working-directory: PhoenixSql.Host
-#       run: mvn compile
+    - if: ${{ matrix.language == 'java' }}
+      name: Build Java
+      working-directory: PhoenixSql.Host
+      run: |
+        cp settings.xml ~/.m2/settings.xml
+        mvn compile
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2

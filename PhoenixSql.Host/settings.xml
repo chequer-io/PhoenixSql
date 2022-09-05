@@ -1,0 +1,27 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <servers>
+    <server>
+      <id>github</id>
+      <username>${env.GITHUB_ACTOR}</username>
+      <password>${env.GITHUB_TOKEN}</password>
+    </server>
+  </servers>
+  <mirrors>
+    <!--<mirror>
+      <id>egov-repository-http-unblocker</id>
+      <mirrorOf>egov-blocked-http-repository</mirrorOf>
+      <name>egovframe</name>
+      <url>http://maven.egovframe.go.kr/maven/</url>
+      <blocked>false</blocked>
+    </mirror>-->
+    <mirror>
+      <id>maven-default-http-blocker</id>
+      <mirrorOf>dummy</mirrorOf>
+      <name>Dummy mirror to override default blocking mirror that blocks http</name>
+      <url>http://0.0.0.0/</url>
+      <blocked>true</blocked>
+    </mirror>
+  </mirrors>
+</settings>
